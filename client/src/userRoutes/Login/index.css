@@ -1,0 +1,15 @@
+.login-bg-container {
+  height: 100vh;
+}
+
+.show-password-container {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 5px;
+}
+
+.checkbox {
+  height: 25px !important;
+  width: 25px !important;
+}

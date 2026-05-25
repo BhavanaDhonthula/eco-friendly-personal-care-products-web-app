@@ -1,0 +1,23 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-light-green: #d4f5d280;
+  --primary-green: green;
+  --bg-light-blue: #add8e680;
+}
+
+.App {
+  text-align: center;
+  font-family: "Roboto";
+}
+
+.logo {
+  font-weight: bold;
+  font-family:
+    "monospace", "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}

@@ -1,0 +1,50 @@
+.landing-page {
+  background-color: var(--bg-light-green);
+}
+
+.content {
+  color: var(--primary-green) !important;
+  padding: 15px;
+  text-align: left !important;
+}
+
+.side_img {
+  border-radius: 10px;
+  width: 30%;
+  margin: 10px;
+}
+
+.landing-heading {
+  font-size: 25px;
+}
+
+.landing-description {
+  font-size: 20px;
+  width: 50%;
+}
+
+.caption {
+  color: var(--primary-green) !important;
+}
+
+.mission {
+  background-color: var(--bg-light-blue);
+}
+
+.mission-heading {
+  color: var(--primary-green);
+}
+
+.mission-description {
+  color: black !important;
+  font-weight: bold !important;
+  width: 80%;
+}
+
+/* featured products */
+
+@media screen and (max-width: 768px) {
+  .content {
+    text-align: center !important;
+  }
+}

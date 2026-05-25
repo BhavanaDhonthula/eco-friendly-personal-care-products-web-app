@@ -1,0 +1,10 @@
+.register-bg-container {
+  height: 100vh;
+  background-color: #ffffff;
+}
+
+.register-heading {
+  background-color: #94e694;
+  color: black;
+  font-family: "Roboto";
+}
