@@ -19,7 +19,7 @@ const packagingTypes = [
   "Glass",
   "Bamboo",
   "Paper&Cardboard",
-  "Zero Waste",
+  "Zero-Waste",
 ];
 
 const ingredientTypes = [
@@ -260,7 +260,7 @@ const SellerAddProduct = () => {
           <div className="row mt-3">
             <div className="col-12">
               <div className="d-flex justify-content-start align-items-center">
-                <ImLeaf className="leaf-icon" size={20} />
+                <ImLeaf className="seller-add-product-leaf-icon " size={20} />
                 <b className="eco-details-heading">Product Details</b>
               </div>
               <hr />
@@ -429,7 +429,7 @@ const SellerAddProduct = () => {
           <div className="row mt-3">
             <div className="col-12">
               <div className="d-flex justify-content-start align-items-center">
-                <ImLeaf className="leaf-icon" size={20} />
+                <ImLeaf className="seller-add-product-leaf-icon " size={20} />
                 <b className="eco-details-heading">Eco Details</b>
               </div>
               <hr />
@@ -547,7 +547,7 @@ const SellerAddProduct = () => {
           <div className="row mt-3">
             <div className="col-12">
               <div className="d-flex justify-content-start align-items-center">
-                <ImLeaf className="leaf-icon" size={20} />
+                <ImLeaf className="seller-add-product-leaf-icon " size={20} />
                 <b className="eco-details-heading">Upload Images</b>
               </div>
               <hr />
@@ -633,7 +633,7 @@ const SellerAddProduct = () => {
 
           <div className="row mt-3">
             <div className="col-12 mb-3 d-flex flex-start">
-              <ImLeaf className="leaf-icon" size={20} />
+              <ImLeaf className="seller-add-product-leaf-icon " size={20} />
               <b className="eco-details-heading">Packaging Type</b>
             </div>
             <hr />

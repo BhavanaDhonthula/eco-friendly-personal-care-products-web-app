@@ -1,5 +1,4 @@
 .register-bg-container {
-  height: 100vh;
   background-color: #ffffff;
 }
 
@@ -7,4 +6,19 @@
   background-color: #94e694;
   color: black;
   font-family: "Roboto";
+}
+
+.register-form {
+  width: 100% !important;
+}
+
+.register-heading {
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+@media screen and (min-width: 768px) {
+  .register-form-container {
+    width: 100% !important;
+  }
 }

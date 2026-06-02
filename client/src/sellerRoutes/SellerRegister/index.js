@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
 import "./index.css";
+
+import Popup from "reactjs-popup";
+import "reactjs-popup/dist/index.css";
 
 const SellerRegister = () => {
   const [storeName, setStoreName] = useState("");
@@ -62,69 +64,87 @@ const SellerRegister = () => {
   };
 
   return (
-    <div className="seller-register-container container-fluid">
-      <div className="row d-flex justify-content-center">
-        <div className="col-12">
-          <h1 className="text-center text-black p-3 seller-register-heading">
-            Create Seller Account
-          </h1>
-        </div>
-        <div className="col-12 col-md-6 seller-form-container">
-          <form
-            encType="multipart/form-data"
-            onSubmit={onSubmitRegister}
-            className="seller-register-form m-4 p-2"
-          >
-            <input
-              autoComplete="true"
-              type="text"
-              name="storeName"
-              placeholder="Store Name"
-              className="form-control  fw-bold mt-4 p-2"
-              onChange={(e) => {
-                setStoreName(e.target.value);
-              }}
-            />
+    <Popup
+      open
+      modal
+      closeOnDocumentClick={false}
+      overlayStyle={{
+        background: "trasparent",
+        backdropFilter: "blur(0px)",
+      }}
+      contentStyle={{
+        border: "none",
+        borderRadius: "20px",
+        overflow: "hidden",
+        width: "50%",
+      }}
+    >
+      <div className="seller-register-container container-fluid">
+        <div className="row d-flex justify-content-center">
+          <div className="col-12">
+            <h1 className="text-center text-black p-2 seller-register-heading">
+              Create Seller Account
+            </h1>
+          </div>
+          <div className="col-12 col-md-6 seller-form-container w-100">
+            <form
+              encType="multipart/form-data"
+              onSubmit={onSubmitRegister}
+              className="seller-register-form"
+            >
+              <input
+                autoComplete="true"
+                type="text"
+                name="storeName"
+                placeholder="Store Name"
+                className="form-control  fw-bold mt-4 p-2"
+                onChange={(e) => {
+                  setStoreName(e.target.value);
+                }}
+              />
 
-            <input
-              autoComplete="true"
-              type="email"
-              name="email"
-              placeholder="Email"
-              className="form-control  fw-bold mt-4 p-2"
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            />
+              <input
+                autoComplete="true"
+                type="email"
+                name="email"
+                placeholder="Email"
+                className="form-control  fw-bold mt-4 p-2"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+              />
 
-            <input
-              autoComplete="true"
-              type="file"
-              name="storeLogo"
-              placeholder="Store Logo"
-              className="form-control  fw-bold mt-4 p-2"
-              onChange={(e) => {
-                onChangeSetShopLogo(e);
-              }}
-            />
-            <div className="btn-container m-auto mt-3">
-              <button type="submit" className="btn btn-success text-white">
-                Register
-              </button>
-            </div>
-          </form>
-          <hr />
-          <p className="fw-bold">
-            Already have an account?
-            <Link to="/seller-login">
-              <span className="text-success text-decoration-underline">
-                Login
-              </span>
-            </Link>
-          </p>
+              <input
+                autoComplete="true"
+                type="file"
+                name="storeLogo"
+                placeholder="Store Logo"
+                className="form-control  fw-bold mt-4 p-2"
+                onChange={(e) => {
+                  onChangeSetShopLogo(e);
+                }}
+              />
+              <div className="btn-container text-center m-auto mt-3">
+                <button type="submit" className="btn btn-success text-white">
+                  Register
+                </button>
+              </div>
+            </form>
+          </div>
+          <div className="col-12">
+            <hr />
+            <p className="fw-bold">
+              Already have an account?
+              <Link to="/seller-login">
+                <span className="text-success text-decoration-underline">
+                  Login
+                </span>
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </Popup>
   );
 };
 export default SellerRegister;

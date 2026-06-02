@@ -68,7 +68,10 @@ const FiltersOffCanvasBody = () => {
           <h3 className="filter-name">Brand Filter :</h3>
           <div className="brands-list">
             {brandsList.map((eachBrand) => (
-              <div className="checkbox-brand-container d-flex gap-3 mt-1">
+              <div
+                key={eachBrand}
+                className="checkbox-brand-container d-flex gap-3 mt-1"
+              >
                 <input
                   type="checkbox"
                   className="form-check-input checkbox"
@@ -85,15 +88,21 @@ const FiltersOffCanvasBody = () => {
         <div className="category-filter-container mt-3">
           <h3 className="filter-name">Category Filter :</h3>
           <div className="brands-list">
-            {categoriesList.map((eachBrand) => (
-              <div className="checkbox-brand-container d-flex gap-3 mt-1">
+            {categoriesList.map((eachCategory) => (
+              <div
+                key={eachCategory}
+                className="checkbox-brand-container d-flex gap-3 mt-1"
+              >
                 <input
                   type="checkbox"
                   className="form-check-input checkbox"
-                  id={eachBrand}
+                  id={eachCategory}
                 />
-                <label className="form-check-label label" htmlFor={eachBrand}>
-                  {eachBrand}
+                <label
+                  className="form-check-label label"
+                  htmlFor={eachCategory}
+                >
+                  {eachCategory}
                 </label>
               </div>
             ))}

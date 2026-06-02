@@ -57,7 +57,6 @@ const Login = () => {
       }}
       contentStyle={{
         width: "50%",
-        height: "400px",
         border: "none",
         borderRadius: "20px",
         padding: "0",
@@ -74,7 +73,7 @@ const Login = () => {
                 </h1>
               </div>
 
-              <div className="col-12 col-md-6 ">
+              <div className="col-12">
                 <form className="register-form" onSubmit={onSubmitLogin}>
                   <input
                     type="text"
@@ -112,10 +111,10 @@ const Login = () => {
                     </label>
                   </div>
 
-                  <div className="btn-container mt-3">
+                  <div className="btn-container text-center mt-3">
                     <button
                       type="submit"
-                      className="btn bg-success mt-2 w-100 fw-bold"
+                      className="btn bg-success mt-2 fw-bold"
                     >
                       Login
                     </button>
@@ -126,6 +125,8 @@ const Login = () => {
                     )}
                   </div>
                 </form>
+              </div>
+              <div className="col-12">
                 <hr />
                 <p className="fw-bold">
                   Don't have an account?

@@ -1,0 +1,8 @@
+.heading-container {
+  display: flex !important;
+  justify-content: flex-start !important;
+}
+
+.cart-items-list {
+  list-style: none;
+}

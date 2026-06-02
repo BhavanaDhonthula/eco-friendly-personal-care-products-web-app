@@ -1,3 +1,4 @@
-.product-imgs-container {
-  list-style: none;
+.carousel-product-img {
+  height: 80vh !important;
+  padding: 15px;
 }

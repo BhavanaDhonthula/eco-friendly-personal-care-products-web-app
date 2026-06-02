@@ -33,12 +33,31 @@ const sellerSchema = new mongoose.Schema({
   storeLogo: { type: String, required: true },
 });
 
+const cartSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  cartItems: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+      quantity: Number,
+    },
+  ],
+});
+
 const User = mongoose.model("User", userSchema);
 const Product = mongoose.model("Product", productSchema);
 const Seller = mongoose.model("Seller", sellerSchema);
+const Cart = mongoose.model("Cart", cartSchema);
 
 module.exports = {
   Product,
   User,
   Seller,
+  Cart,
 };

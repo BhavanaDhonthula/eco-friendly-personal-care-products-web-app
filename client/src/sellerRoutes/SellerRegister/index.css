@@ -3,6 +3,11 @@
   font-family: "Roboto";
 }
 
+.seller-register-heading {
+  border-radius: 10px;
+  margin-top: 5px;
+}
+
 /* .seller-form-container {
   background-color: var(--bg-light-green);
 } */

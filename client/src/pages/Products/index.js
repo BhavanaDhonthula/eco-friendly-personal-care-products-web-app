@@ -35,7 +35,7 @@ const Products = () => {
     setChangedProductsList,
   } = FilterContextValue;
 
-  console.log(changedProductsList);
+  // console.log(changedProductsList);
 
   useEffect(() => {
     const onLoadGetProducts = async () => {

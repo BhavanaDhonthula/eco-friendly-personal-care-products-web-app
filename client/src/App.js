@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 
 import UserLayout from "./services/UserLayout";
 import SellerLayout from "./services/SellerLayout";
+import CartLayout from "./services/CartLayout";
 
 import Home from "./userRoutes/Home";
 import About from "./userRoutes/About";
@@ -25,7 +26,6 @@ import ProtectedRoute from "./services/ProtectedRoute";
 import SellerProtectedRoute from "./services/SellerProtectedRoute";
 
 import { useState } from "react";
-import FiltersOffCanvasBody from "./components/FiltersOffCanvasBody";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -42,44 +42,51 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route element={<UserLayout />}>
-            <Route exact path="/" element={<Home />} />
-            <Route exact path="/register" element={<Register />} />
-            <Route exact path="/login" element={<Login />} />
-            <Route
-              exact
-              path="/products"
-              element={
-                <FiltersContext.Provider
-                  value={{
-                    productsList,
-                    changedProductsList,
-                    setProductsList,
-                    setChangedProductsList,
-                  }}
-                >
+          <Route
+            element={
+              <CartLayout>
+                <Outlet />
+              </CartLayout>
+            }
+          >
+            <Route element={<UserLayout />}>
+              <Route exact path="/" element={<Home />} />
+              <Route exact path="/register" element={<Register />} />
+              <Route exact path="/login" element={<Login />} />
+
+              <Route
+                path="/products"
+                element={
                   <ProtectedRoute>
-                    <Products />
+                    <FiltersContext.Provider
+                      value={{
+                        productsList,
+                        changedProductsList,
+                        setProductsList,
+                        setChangedProductsList,
+                      }}
+                    >
+                      <Products />
+                    </FiltersContext.Provider>
                   </ProtectedRoute>
-                </FiltersContext.Provider>
-              }
-            />
-            <Route
-              exact
-              path="/productDetailsPage/:id"
-              element={<ProductDetailsPage />}
-            />
+                }
+              />
+              <Route
+                path="/productDetailsPage/:id"
+                element={<ProductDetailsPage />}
+              />
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <Cart />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
             <Route exact path="/about" element={<About />} />
             <Route exact path="/contact" element={<Contact />} />
-            <Route
-              exact
-              path="/cart"
-              element={
-                <ProtectedRoute>
-                  <Cart />
-                </ProtectedRoute>
-              }
-            />
             <Route
               exact
               path="/addresses"

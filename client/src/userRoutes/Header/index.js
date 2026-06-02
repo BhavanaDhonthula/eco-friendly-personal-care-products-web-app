@@ -2,9 +2,12 @@ import { Link } from "react-router-dom";
 import { FaCartArrowDown } from "react-icons/fa";
 import "./index.css";
 import Cookies from "js-cookie";
+import { useContext } from "react";
+import CartContext from "../../services/contexts/CartContext";
 
 const Header = () => {
   const profileWord = Cookies.get("letter") || "";
+  const { cartItems } = useContext(CartContext);
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary sticky-top">
@@ -56,7 +59,7 @@ const Header = () => {
               >
                 <FaCartArrowDown size={20} className="" />
                 <div className="cart-count">
-                  <span>10</span>
+                  <span>{cartItems.length}</span>
                 </div>
               </Link>
             </li>
