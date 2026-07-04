@@ -1,115 +1,182 @@
 import "./index.css";
-import { useState, useContext } from "react";
+import { useContext, useState } from "react";
 import FiltersContext from "../../services/contexts/FiltersContext";
+import getProducts from "../../services/getProducts";
+
+const priceSortOptions = [
+  {
+    id: "relevance",
+    displayText: "Relevance",
+  },
+  {
+    id: "highToLow",
+    displayText: "High - Low",
+  },
+  {
+    id: "lowToHigh",
+    displayText: "Low - High",
+  },
+];
 
 const FiltersOffCanvasBody = () => {
   const FiltersContextValue = useContext(FiltersContext);
 
-  const { productsList, changedProductsList, setChangedProductsList } =
-    FiltersContextValue;
+  const { productsList, setChangedProductsList } = FiltersContextValue;
 
-  const brandsList = [
-    ...new Set(productsList.map((eachProduct) => eachProduct.brand)),
-  ];
+  const [sort, setSort] = useState("relevance");
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [showAllBrands, setShowAllBrands] = useState(false);
+
+  console.log(selectedBrands);
+
+  const brandsList = [...new Set(productsList.map((product) => product.brand))];
 
   const categoriesList = [
-    ...new Set(productsList.map((eachProduct) => eachProduct.category)),
+    ...new Set(productsList.map((product) => product.category)),
   ];
 
-  const sortProductsLowToHigh = () => {
-    let lowToHighList = [...productsList].sort((a, b) => a.price - b.price);
-    setChangedProductsList(lowToHighList);
+  const visibleBrands = showAllBrands ? brandsList : brandsList.slice(0, 6);
+
+  const applyFilters = async (
+    category = selectedCategory,
+    brands = selectedBrands,
+    sorting = sort,
+  ) => {
+    const filteredProducts = await getProducts(
+      category,
+      brands.join(","),
+      sorting,
+    );
+
+    setChangedProductsList(filteredProducts);
   };
 
-  const sortProductsHighToLow = () => {
-    let highToLowList = [...productsList].sort((a, b) => b.price - a.price);
-    setChangedProductsList(highToLowList);
+  const onChangeSort = async (e) => {
+    const selectedSort = e.target.value;
+
+    setSort(selectedSort);
+
+    await applyFilters(selectedCategory, selectedBrands, selectedSort);
+  };
+
+  const onChangeBrand = async (e) => {
+    const brand = e.target.value;
+
+    let updatedBrands = [];
+
+    if (selectedBrands.includes(brand)) {
+      updatedBrands = selectedBrands.filter((eachBrand) => eachBrand !== brand);
+    } else {
+      updatedBrands = [...selectedBrands, brand];
+    }
+
+    setSelectedBrands(updatedBrands);
+
+    await applyFilters(selectedCategory, updatedBrands, sort);
+  };
+
+  const onChangeCategory = async (e) => {
+    const category = e.target.value;
+
+    setSelectedCategory(category);
+
+    await applyFilters(category, selectedBrands, sort);
+  };
+
+  const clearFilters = async () => {
+    setSort("relevance");
+    setSelectedBrands([]);
+    setSelectedCategory("");
+
+    const allProducts = await getProducts();
+
+    setChangedProductsList(allProducts);
   };
 
   return (
-    <>
-      <div className="filters-bg-container">
-        <div className="price-filter-container ">
-          <h3 className="filter-name">Price Filter :</h3>
-          <div className="">
-            <button
-              className="low-to-high-filter btn btn-outline-warning"
-              onClick={() => {
-                sortProductsLowToHigh();
-              }}
-            >
-              Low - High
-            </button>
-          </div>
-          <div className="">
-            <button
-              className="low-to-high-filter btn btn-outline-warning"
-              onClick={() => {
-                sortProductsHighToLow();
-              }}
-            >
-              High - Low
-            </button>
-          </div>
+    <div className="filters-bg-container">
+      {/* Price Filter */}
+      <div className="price-filter-container">
+        <h3 className="filter-name">Price Sort :</h3>
 
-          <div className="">
-            <button
-              className="relevance btn btn-outline-warning"
-              onClick={() => {
-                setChangedProductsList(productsList);
-              }}
-            >
-              Relevance
-            </button>
-          </div>
-        </div>
+        {priceSortOptions.map((option) => (
+          <div key={option.id} className="form-check mt-2">
+            <input
+              type="radio"
+              name="priceSort"
+              id={option.id}
+              value={option.id}
+              checked={sort === option.id}
+              onChange={onChangeSort}
+              className="form-check-input"
+            />
 
-        <div className="brand-filter-container mt-3">
-          <h3 className="filter-name">Brand Filter :</h3>
-          <div className="brands-list">
-            {brandsList.map((eachBrand) => (
-              <div
-                key={eachBrand}
-                className="checkbox-brand-container d-flex gap-3 mt-1"
-              >
-                <input
-                  type="checkbox"
-                  className="form-check-input checkbox"
-                  id={eachBrand}
-                />
-                <label className="form-check-label label" htmlFor={eachBrand}>
-                  {eachBrand}
-                </label>
-              </div>
-            ))}
+            <label htmlFor={option.id} className="form-check-label">
+              {option.displayText}
+            </label>
           </div>
-        </div>
-
-        <div className="category-filter-container mt-3">
-          <h3 className="filter-name">Category Filter :</h3>
-          <div className="brands-list">
-            {categoriesList.map((eachCategory) => (
-              <div
-                key={eachCategory}
-                className="checkbox-brand-container d-flex gap-3 mt-1"
-              >
-                <input
-                  type="checkbox"
-                  className="form-check-input checkbox"
-                  id={eachCategory}
-                />
-                <label
-                  className="form-check-label label"
-                  htmlFor={eachCategory}
-                >
-                  {eachCategory}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
-    </>
+
+      {/* Brand Filter */}
+      <div className="brand-filter-container mt-4">
+        <h3 className="filter-name">Brands :</h3>
+
+        {visibleBrands.map((brand) => (
+          <div key={brand} className="d-flex gap-2 align-items-center mt-2">
+            <input
+              type="checkbox"
+              id={brand}
+              value={brand}
+              checked={selectedBrands.includes(brand)}
+              onChange={onChangeBrand}
+              className="form-check-input"
+            />
+
+            <label htmlFor={brand}>{brand}</label>
+          </div>
+        ))}
+
+        {brandsList.length > 6 && (
+          <button
+            type="button"
+            className="btn btn-link p-0 mt-2"
+            onClick={() => setShowAllBrands(!showAllBrands)}
+          >
+            {showAllBrands ? "Show Less" : "Show More"}
+          </button>
+        )}
+      </div>
+
+      {/* Category Filter */}
+      <div className="category-filter-container mt-4">
+        <h3 className="filter-name">Categories :</h3>
+
+        {categoriesList.map((category) => (
+          <div key={category} className="d-flex gap-2 align-items-center mt-2">
+            <input
+              type="radio"
+              id={category}
+              name="category"
+              value={category}
+              checked={selectedCategory === category}
+              onChange={onChangeCategory}
+              className="form-check-input"
+            />
+
+            <label htmlFor={category}>{category}</label>
+          </div>
+        ))}
+      </div>
+
+      {/* Clear Filters */}
+      <div className="mt-4">
+        <button className="btn btn-danger w-100" onClick={clearFilters}>
+          Clear Filters
+        </button>
+      </div>
+    </div>
   );
 };
 

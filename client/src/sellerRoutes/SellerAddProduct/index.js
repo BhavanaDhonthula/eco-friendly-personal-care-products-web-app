@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { ImLeaf } from "react-icons/im";
 import "./index.css";
+import Cookies from "js-cookie";
 
 const categories = [
   "Select",
@@ -45,6 +46,7 @@ const SellerAddProduct = () => {
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [stock, setStock] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState([]);
   const [ingredientType, setIngredientType] = useState("");
@@ -52,6 +54,7 @@ const SellerAddProduct = () => {
   const [packagingType, setPackagingType] = useState("");
   const [specifications, setSpecifications] = useState([]);
 
+  const [successMsg, setSuccessMsg] = useState("");
   const [errors, setErrors] = useState({});
 
   const settingToInitialState = () => {
@@ -60,6 +63,7 @@ const SellerAddProduct = () => {
     setCategory("");
     setPrice("");
     setQuantity("");
+    setStock("");
     setDescription("");
     setIngredients([]);
     setIngredientType("");
@@ -98,9 +102,17 @@ const SellerAddProduct = () => {
       errors.price = "Enter a valid price";
     }
 
-    if (!data.quantity || data.quantity <= 0) {
+    if (data.quantity === "" || !data.quantity) {
       errors.quantity = "Enter valid stock quantity";
     }
+
+    // ── Stock validation ──────────────────────────────────────────
+    if (data.stock === "" || data.stock === null || data.stock === undefined) {
+      errors.stock = "Enter available stock count";
+    } else if (parseInt(data.stock, 10) < 0) {
+      errors.stock = "Stock cannot be negative";
+    }
+    // ─────────────────────────────────────────────────────────────
 
     if (!data.description.trim()) {
       errors.description = "Description is required";
@@ -178,6 +190,7 @@ const SellerAddProduct = () => {
       price,
       category,
       quantity,
+      stock,
       description,
       ingredients,
       ingredientType,
@@ -219,22 +232,31 @@ const SellerAddProduct = () => {
       formData.append("productImgs", file);
     });
 
-    console.log(formData);
+    // console.log(formData);
+
+    const sellerToken = Cookies.get("seller_access_token");
 
     const url = "http://localhost:8000/products";
     const optionsConfiguration = {
       method: "POST",
+
+      headers: {
+        Authorization: `Bearer ${sellerToken}`,
+      },
       body: formData,
     };
 
     const response = await fetch(url, optionsConfiguration);
-    const data = await response.json();
+    // const data = await response.json();
 
     if (response.ok) {
-      console.log(data.succ_msg);
+      setSuccessMsg("✅ Product added successfully!");
       settingToInitialState();
     } else {
-      console.log(data.err_msg);
+      const data = await response.json();
+      setErrors({
+        submit: data.err_msg || "Failed to add product. Try again.",
+      });
     }
   };
 
@@ -251,11 +273,18 @@ const SellerAddProduct = () => {
         </div>
       </div>
 
+      {successMsg && (
+        <div className="container">
+          <div className="alert alert-success fw-bold">{successMsg}</div>
+        </div>
+      )}
+
       <form
         className="form-container m-3"
         encType="multipart/form-data"
         onSubmit={submitForm}
       >
+        {/* ── Product Details ───────────────────────────────────── */}
         <div className="container">
           <div className="row mt-3">
             <div className="col-12">
@@ -266,7 +295,7 @@ const SellerAddProduct = () => {
               <hr />
             </div>
           </div>
-
+          {/* Product Name */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex text-start">
               <label htmlFor="productName" className="label">
@@ -293,6 +322,7 @@ const SellerAddProduct = () => {
             )}
           </div>
 
+          {/* Brand */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex flex-start">
               <label htmlFor="brand" className="label">
@@ -318,6 +348,7 @@ const SellerAddProduct = () => {
             )}
           </div>
 
+          {/* Category */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex flex-start">
               <label htmlFor="category" className="label">
@@ -347,6 +378,7 @@ const SellerAddProduct = () => {
             )}
           </div>
 
+          {/* Price */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex flex-start">
               <label htmlFor="price" className="label">
@@ -371,6 +403,7 @@ const SellerAddProduct = () => {
             )}
           </div>
 
+          {/* Quantity — the unit/size label e.g. "200ml" */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex flex-start">
               <label htmlFor="stockQuantity" className="label">
@@ -398,6 +431,40 @@ const SellerAddProduct = () => {
             )}
           </div>
 
+          {/* ── Stock (NEW) ──────────────────────────────────────── */}
+          <div className="row mt-3 d-flex align-items-center">
+            <div className="col-12 col-md-3 d-flex flex-start">
+              <label htmlFor="stockCount" className="label">
+                Stock
+                <span
+                  className="text-muted fw-normal ms-1"
+                  style={{ fontSize: "0.8rem" }}
+                >
+                  (units available)
+                </span>
+              </label>
+            </div>
+            <div className="col-12 col-md-5">
+              <input
+                id="stockCount"
+                type="number"
+                min="0"
+                className="form-control"
+                placeholder="e.g. 50"
+                value={stock}
+                onChange={(e) => {
+                  setStock(e.target.value);
+                  clearError("stock");
+                }}
+              />
+            </div>
+            {errors.stock && (
+              <p className="text-danger text-start fw-bold">{errors.stock}</p>
+            )}
+          </div>
+          {/* ─────────────────────────────────────────────────────── */}
+
+          {/* Description */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex flex-start">
               <label htmlFor="description" className="form-label label">
@@ -436,6 +503,7 @@ const SellerAddProduct = () => {
             </div>
           </div>
 
+          {/* Ingredients */}
           <div className="container">
             <div className="row mt-3  d-flex align-items-center">
               <div className="col-12 col-md-3 d-flex flex-start">
@@ -459,6 +527,7 @@ const SellerAddProduct = () => {
               )}
             </div>
 
+            {/* Ingredient Type */}
             <div className="row mt-3  d-flex align-items-center">
               <div className="col-12 col-md-3 d-flex text-start">
                 <label htmlFor="ingredientType" className="label">
@@ -490,6 +559,7 @@ const SellerAddProduct = () => {
               )}
             </div>
 
+            {/* Carbon Footprint */}
             <div className="row mt-3  d-flex align-items-center">
               <div className="col-12 col-md-3 d-flex text-start">
                 <label htmlFor="carbonFootprint" className="label">
@@ -517,6 +587,7 @@ const SellerAddProduct = () => {
               )}
             </div>
 
+            {/* Specifications */}
             <div className="row mt-3  d-flex align-items-center">
               <div className="col-12 col-md-3 d-flex flex-start">
                 <label htmlFor="specifications" className="label">
@@ -554,6 +625,7 @@ const SellerAddProduct = () => {
             </div>
           </div>
 
+          {/* Thumbnail */}
           <div className="row mt-3 d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex text-start">
               <label htmlFor="thumbnail" className="form-label label">
@@ -592,6 +664,7 @@ const SellerAddProduct = () => {
             </div>
           </div>
 
+          {/* Product Images */}
           <div className="row mt-3  d-flex align-items-center">
             <div className="col-12 col-md-3 d-flex text-start">
               <label htmlFor="productImages" className="label form-label">
@@ -631,6 +704,7 @@ const SellerAddProduct = () => {
             ) : null}
           </div>
 
+          {/* Packaging Type */}
           <div className="row mt-3">
             <div className="col-12 mb-3 d-flex flex-start">
               <ImLeaf className="seller-add-product-leaf-icon " size={20} />

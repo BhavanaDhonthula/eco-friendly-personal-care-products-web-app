@@ -1,0 +1,27 @@
+.checkout-bg-container {
+  min-height: 80vh;
+}
+
+.checkout-section .card-body {
+  padding: 1.25rem;
+}
+
+.address-card:hover {
+  background-color: #f8f9fa;
+}
+
+.payment-option:hover {
+  background-color: #f8f9fa;
+}
+
+.checkout-empty-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-option:not(.payment-disabled):hover {
+  background-color: #f0faf0;
+}

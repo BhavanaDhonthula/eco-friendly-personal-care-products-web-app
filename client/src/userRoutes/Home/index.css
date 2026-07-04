@@ -41,7 +41,54 @@
   width: 80%;
 }
 
+.first-row {
+  background-color: rgb(207, 234, 207);
+}
+
 /* featured products */
+
+.featured-products-container {
+  list-style: none;
+}
+
+.body {
+  background-color: #e0f2f8;
+}
+
+.skin {
+  background-color: #f7dee2;
+}
+
+.hair {
+  background-color: #ead9f7;
+}
+
+.oral {
+  background-color: rgb(250, 250, 224);
+}
+
+.wellness {
+  background-color: azure;
+}
+
+.featured-product-img {
+  height: 300px;
+  width: 300px;
+}
+
+.featured-product-img:hover {
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.3s;
+  transform: translateY(-5px);
+}
+
+.why-choose-point {
+  margin-top: 10px;
+}
+
+.footer {
+  background-color: #e8f6e8 !important;
+}
 
 @media screen and (max-width: 768px) {
   .content {

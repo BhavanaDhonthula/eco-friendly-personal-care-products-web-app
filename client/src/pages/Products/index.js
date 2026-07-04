@@ -35,7 +35,11 @@ const Products = () => {
     setChangedProductsList,
   } = FilterContextValue;
 
-  // console.log(changedProductsList);
+  // console.log(
+  //   productsList.map((eachProduct) => {
+  //     return eachProduct.specifications;
+  //   }),
+  // );
 
   useEffect(() => {
     const onLoadGetProducts = async () => {

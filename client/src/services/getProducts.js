@@ -1,34 +1,32 @@
-const getProducts = async () => {
-  let url = "http://localhost:8000/products";
-  let bodyCareProducts = [];
-  let hairCareProducts = [];
-  let oralCareProducts = [];
-  let skinCareProducts = [];
-  let wellnessProducts = [];
-  let allProducts = [];
+const getProducts = async (category = "", brand = "", sort = "relevance") => {
+  const params = new URLSearchParams();
 
-  const response = await fetch(url);
-  const data = await response.json();
+  if (category) params.append("category", category);
+  if (brand) params.append("brand", brand);
+  if (sort !== "relevance") params.append("sort", sort);
 
-  if (response.ok) {
-    // data.forEach((product) => {
-    //   if (product.category === "Body Care") {
-    //     bodyCareProducts.push(product);
-    //   } else if (product.category === "Skin Care") {
-    //     skinCareProducts.push(product);
-    //   } else if (product.category === "Oral Care") {
-    //     oralCareProducts.push(product);
-    //   } else if (product.category === "Hair Care") {
-    //     hairCareProducts.push(product);
-    //   } else if (product.category === "Hygiene & Wellness") {
-    //     wellnessProducts.push(product);
-    //   } else {
-    //     allProducts = data;
-    //   }
-    // });
-    return data;
+  const url = `http://localhost:8000/products?${params.toString()}`;
+  console.log(url);
+
+  if (params.toString()) {
+    window.history.pushState({}, "", `?${params.toString()}`);
   } else {
-    return data.err_msg;
+    window.history.pushState({}, "", window.location.pathname);
+  }
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (response.ok) {
+      return data;
+    }
+
+    console.error(data.err_msg);
+    return [];
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 };
 

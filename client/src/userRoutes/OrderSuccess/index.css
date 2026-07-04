@@ -1,0 +1,31 @@
+.order-success-bg-container {
+  min-height: 90vh;
+  background-color: #f0faf0;
+  padding: 2rem 1rem;
+}
+
+.order-success-card {
+  background: #fff;
+  max-width: 560px;
+  width: 100%;
+}
+
+.success-checkmark {
+  font-size: 3.5rem;
+}
+
+.order-details-box {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.delivery-estimate {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.shipping-address-box {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}

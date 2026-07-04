@@ -45,9 +45,18 @@ const Header = () => {
             <li className="nav-item">
               <Link
                 className="tab nav-link text-black fw-bold"
-                to="/seller-register"
+                to={
+                  Cookies.get("seller_access_token")
+                    ? "/seller-dashboard"
+                    : "/seller-login"
+                }
               >
                 Become a Seller
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="tab nav-link text-black fw-bold" to="/addresses">
+                Addresses
               </Link>
             </li>
           </ul>

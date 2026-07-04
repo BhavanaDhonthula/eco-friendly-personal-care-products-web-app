@@ -61,58 +61,66 @@ const SellerLogin = () => {
         width: "50%",
       }}
     >
-      <div className="seller-login-container mt-3  container-fluid">
-        <div className="row  d-flex justify-content-center">
-          <div className="col-12">
-            <h1 className="seller-login-heading p-2 text-center text-black">
-              Seller Login
-            </h1>
-          </div>
-          <div className="col-12">
-            <form
-              onSubmit={onSubmitLoginSeller}
-              className="seller-login-form-container"
-            >
-              <input
-                autoComplete="true"
-                type="text"
-                name="storeName"
-                placeholder="Store Name"
-                className="form-control  fw-bold mt-4 p-2"
-                onChange={(e) => {
-                  setStoreName(e.target.value);
-                }}
-              />
-              <input
-                autoComplete="true"
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="form-control  fw-bold mt-4 p-2"
-                onChange={(e) => {
-                  setEmail(e.target.value.toLowerCase());
-                }}
-              />
-              <div className="btn-container text-center mt-3">
-                <button type="submit" className="btn btn-success">
-                  Login
+      {(close) => (
+        <>
+          <div className="seller-login-container mt-3  container-fluid">
+            <div className="row  d-flex justify-content-center">
+              <div className="col-12 seller-login-heading d-flex align-items-center justify-content-between">
+                <h1 className=" p-2 text-center text-black">Seller Login</h1>
+                <button
+                  className="bg-transparent p-1 pe-2 ps-2 text-dark rounded-2"
+                  onClick={close}
+                >
+                  X
                 </button>
               </div>
-            </form>
+              <div className="col-12">
+                <form
+                  onSubmit={onSubmitLoginSeller}
+                  className="seller-login-form-container"
+                >
+                  <input
+                    autoComplete="true"
+                    type="text"
+                    name="storeName"
+                    placeholder="Store Name"
+                    className="form-control  fw-bold mt-4 p-2"
+                    onChange={(e) => {
+                      setStoreName(e.target.value);
+                    }}
+                  />
+                  <input
+                    autoComplete="true"
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="form-control  fw-bold mt-4 p-2"
+                    onChange={(e) => {
+                      setEmail(e.target.value.toLowerCase());
+                    }}
+                  />
+                  <div className="btn-container text-center mt-3">
+                    <button type="submit" className="btn btn-success">
+                      Login
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <div className="col-12">
+                <hr />
+                <p className="fw-bold">
+                  Don't have an account?
+                  <Link to="/seller-register">
+                    <span className="text-success text-decoration-underline">
+                      Register
+                    </span>
+                  </Link>
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="col-12">
-            <hr />
-            <p className="fw-bold">
-              Don't have an account?
-              <Link to="/seller-register">
-                <span className="text-success text-decoration-underline">
-                  Register
-                </span>
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </Popup>
   );
 };

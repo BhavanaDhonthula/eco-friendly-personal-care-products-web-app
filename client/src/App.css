@@ -21,3 +21,23 @@
     "monospace", "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
     "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
+
+.product-added-btn {
+  border: none !important;
+  cursor: not-allowed !important;
+  background-image: linear-gradient(-35deg, #39f235, #d6f223) !important;
+  text-align: center !important;
+  font-family: cursive !important;
+}
+
+.star-icon {
+  margin-left: 10px;
+  color: red;
+}
+
+.add-to-cart-btn {
+  background-image: linear-gradient(-35deg, coral, #cfec0d) !important;
+  color: white !important;
+  font-weight: bolder !important;
+  border: none !important;
+}

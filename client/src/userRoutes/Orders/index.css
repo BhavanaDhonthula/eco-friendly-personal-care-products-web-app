@@ -1,0 +1,237 @@
+.orders-bg-container {
+  min-height: 80vh;
+}
+
+/* Filter tabs */
+.orders-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+.orders-tab-btn {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.orders-tab-btn.active {
+  background: #198754;
+  color: #fff;
+  border-color: #198754;
+}
+.orders-tab-btn:hover:not(.active) {
+  background: #e9ecef;
+}
+.orders-tab-count {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+}
+.orders-tab-btn.active .orders-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Status badges */
+.order-status-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+}
+.badge-placed {
+  background: #e2e3e5;
+  color: #383d41;
+}
+.badge-accepted {
+  background: #cce5ff;
+  color: #004085;
+}
+.badge-packed {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+.badge-shipped {
+  background: #fff3cd;
+  color: #856404;
+}
+.badge-otd {
+  background: #fde8d0;
+  color: #7c3a00;
+}
+.badge-delivered {
+  background: #d4edda;
+  color: #155724;
+}
+.badge-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Order card */
+.order-card-user {
+  background: #fff;
+  transition: box-shadow 0.15s;
+  overflow: hidden;
+}
+.order-card-user:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09) !important;
+}
+.order-card-header:hover {
+  background: #f8f9fa;
+}
+.order-item-row {
+  background: #f8f9fa;
+}
+.price-summary {
+  background: #f0faf0;
+  border: 1px solid #c3e6cb;
+}
+.shipping-box {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+/* Loading / empty */
+.orders-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+
+/* Timeline */
+.order-timeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 80px;
+  flex: 1;
+}
+.timeline-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #dee2e6;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 1;
+  flex-shrink: 0;
+}
+.timeline-step.done .timeline-dot {
+  background: #198754;
+  color: #fff;
+}
+.timeline-step.active .timeline-dot {
+  background: #198754;
+  color: #fff;
+  box-shadow: 0 0 0 4px #d4edda;
+  font-size: 1rem;
+}
+.timeline-line {
+  position: absolute;
+  top: 16px;
+  left: calc(50% + 16px);
+  width: calc(100% - 32px);
+  height: 3px;
+  background: #dee2e6;
+  z-index: 0;
+}
+.timeline-line.filled {
+  background: #198754;
+}
+.timeline-label {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-align: center;
+  line-height: 1.2;
+}
+.timeline-step.done .timeline-label,
+.timeline-step.active .timeline-label {
+  color: #198754;
+}
+.timeline-cancelled {
+  padding: 0.6rem 1rem;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+@media (max-width: 576px) {
+  .timeline-label {
+    font-size: 0.62rem;
+  }
+  .timeline-step {
+    min-width: 56px;
+  }
+}
+
+/* ── Review / comment section ── */
+.review-section {
+  border-top: 1px dashed #c3e6cb;
+  padding-top: 1rem;
+}
+
+.review-form {
+  background: #f8f9fa;
+  border-color: #dee2e6 !important;
+}
+
+/* Star picker */
+.star-picker {
+  display: flex;
+  gap: 4px;
+}
+.star-btn {
+  font-size: 1.6rem;
+  color: #dee2e6;
+  cursor: pointer;
+  transition:
+    color 0.1s,
+    transform 0.1s;
+  line-height: 1;
+}
+.star-btn:hover,
+.star-btn.filled {
+  color: #f6c23e;
+}
+.star-btn:hover {
+  transform: scale(1.15);
+}
+
+.review-success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  font-size: 0.88rem;
+  font-weight: 600;
+}

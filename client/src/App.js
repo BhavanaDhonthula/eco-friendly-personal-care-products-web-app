@@ -5,9 +5,9 @@ import SellerLayout from "./services/SellerLayout";
 import CartLayout from "./services/CartLayout";
 
 import Home from "./userRoutes/Home";
-import About from "./userRoutes/About";
+
 import Cart from "./userRoutes/Cart";
-import Contact from "./userRoutes/Contact";
+
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import Products from "./pages/Products";
 import Login from "./userRoutes/Login";
@@ -16,6 +16,7 @@ import Checkout from "./userRoutes/Checkout";
 import Addresses from "./userRoutes/Addresses";
 import OrderSuccess from "./userRoutes/OrderSuccess";
 import Profile from "./userRoutes/Profile";
+import Orders from "./userRoutes/Orders";
 
 import SellerRegister from "./sellerRoutes/SellerRegister";
 import SellerLogin from "./sellerRoutes/SellerLogin";
@@ -24,6 +25,11 @@ import SellerAddProduct from "./sellerRoutes/SellerAddProduct";
 
 import ProtectedRoute from "./services/ProtectedRoute";
 import SellerProtectedRoute from "./services/SellerProtectedRoute";
+
+import PrivacyPolicy from "./components/Policies/PrivacyPolicy";
+import RefundPolicy from "./components/Policies/RefundPolicy";
+import ShippingPolicy from "./components/Policies/ShippingPolicy";
+import TermsOfService from "./components/Policies/TermsOfService";
 
 import { useState } from "react";
 
@@ -54,6 +60,19 @@ function App() {
               <Route exact path="/register" element={<Register />} />
               <Route exact path="/login" element={<Login />} />
 
+              <Route exact path="/privacyPolicy" element={<PrivacyPolicy />} />
+              <Route exact path="/refundPolicy" element={<RefundPolicy />} />
+              <Route
+                exact
+                path="/shippingPolicy"
+                element={<ShippingPolicy />}
+              />
+              <Route
+                exact
+                path="/termsOfService"
+                element={<TermsOfService />}
+              />
+
               <Route
                 path="/products"
                 element={
@@ -83,30 +102,38 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-            </Route>
+              <Route
+                exact
+                path="/addresses"
+                element={
+                  <ProtectedRoute>
+                    <Addresses />
+                  </ProtectedRoute>
+                }
+              />
+              <Route exact path="/checkout" element={<Checkout />} />
+              <Route exact path="/order-success" element={<OrderSuccess />} />
+              <Route
+                exact
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route exact path="/about" element={<About />} />
-            <Route exact path="/contact" element={<Contact />} />
-            <Route
-              exact
-              path="/addresses"
-              element={
-                <ProtectedRoute>
-                  <Addresses />
-                </ProtectedRoute>
-              }
-            />
-            <Route exact path="/checkout" element={<Checkout />} />
-            <Route exact path="/order-success" element={<OrderSuccess />} />
-            <Route
-              exact
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              {/* ── Orders page ── */}
+              <Route
+                exact
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
           </Route>
           <Route element={<SellerLayout />}>
             <Route exact path="/seller-register" element={<SellerRegister />} />

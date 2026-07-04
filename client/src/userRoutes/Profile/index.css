@@ -1,0 +1,112 @@
+.profile-bg-container {
+  min-height: 80vh;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #198754;
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list-group-item.active-tab {
+  background-color: #d4f5d2;
+  color: #155724;
+  border-color: #b8ddb8;
+  font-weight: 700;
+}
+
+.list-group-item {
+  border-radius: 0 !important;
+  font-size: 0.93rem;
+}
+
+.profile-stat-card {
+  background-color: #f8f9fa;
+  transition:
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.profile-stat-card:hover {
+  background-color: #d4f5d2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  font-size: 1.8rem;
+}
+
+.eco-tip-box {
+  background-color: #d4f5d2;
+  border: 1px solid #b8ddb8;
+  color: #155724;
+}
+
+.order-card {
+  background-color: #fafafa;
+  transition: box-shadow 0.15s;
+}
+
+.order-card:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.settings-item {
+  background-color: #fafafa;
+}
+
+/* ── Delete account box ─────────────────────────────────────────────── */
+.delete-account-box {
+  background-color: #fff5f5;
+}
+
+/* ── Delete confirmation modal ──────────────────────────────────────── */
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.delete-modal-box {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.delete-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f5c6cb;
+  background-color: #fff5f5;
+}
+
+.delete-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #dee2e6;
+}
+
+@media (max-width: 767px) {
+  .profile-content-card {
+    margin-top: 0;
+  }
+}

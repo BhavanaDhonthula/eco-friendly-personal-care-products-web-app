@@ -1,32 +1,32 @@
 import { useContext } from "react";
-import { useState } from "react";
 import "./index.css";
+import { Link } from "react-router-dom";
 import CartContext from "../../services/contexts/CartContext";
 
 const CartItemCard = (props) => {
   const imageConst = "http://localhost:8000/major-project-imgs/";
   const { cartItemDetails } = props;
-  const [productOrderQty, setProductOrderQty] = useState(1);
-  const { productName, price, quantity, thumbnail, _id } = cartItemDetails;
+  const { productName, quantity, thumbnail, _id, price, orderQuantity } =
+    cartItemDetails;
   const cartContextValue = useContext(CartContext);
 
-  const { removeFromCart } = cartContextValue;
+  const { increaseOrdQty, decreaseOrdQty, removeFromCart } = cartContextValue;
 
-  const increaseQty = () => {
-    if (productOrderQty >= 1) {
-      setProductOrderQty((prevState) => prevState + 1);
-    } else {
-      setProductOrderQty(1);
-    }
-  };
+  // const increaseOrdQty = () => {
+  //   if (productOrderQty >= 1) {
+  //     setProductOrderQty((prevState) => prevState + 1);
+  //   } else {
+  //     removeFromCart(_id);
+  //   }
+  // };
 
-  const decreaseQty = (productId) => {
-    if (productOrderQty === 1) {
-      removeFromCart(productId);
-      return;
-    }
-    setProductOrderQty((prevState) => prevState - 1);
-  };
+  // const decreaseOrdQty = (productId) => {
+  //   if (productOrderQty === 1) {
+  //     removeFromCart(productId);
+  //     return;
+  //   }
+  //   setProductOrderQty((prevState) => prevState - 1);
+  // };
 
   return (
     <div className="cart-item-card-container">
@@ -41,28 +41,35 @@ const CartItemCard = (props) => {
         <div className="cart-item-details-container">
           <p className="cart-item-product-name">{productName}</p>
           <p className="cart-item-quantity">Quantity: {quantity} </p>
-          <p className="cart-item-price">Price: ₹{price}</p>
-          <span className="cart-item-quantity-container bg-success">
-            <button
-              type="button"
-              className="reduce-btn"
-              onClick={() => {
-                decreaseQty(_id);
-              }}
-            >
-              -
-            </button>
-            <span className="reduce-btn">{productOrderQty}</span>
-            <button
-              type="button"
-              onClick={() => {
-                increaseQty();
-              }}
-              className="increase-btn"
-            >
-              +
-            </button>
-          </span>
+          <p className="cart-item-price">Price: ₹{price * orderQuantity}</p>
+          <div className="d-flex gap-3">
+            <span className="cart-item-quantity-container bg-success">
+              <button
+                type="button"
+                className="reduce-btn"
+                onClick={() => {
+                  decreaseOrdQty(_id);
+                }}
+              >
+                -
+              </button>
+              <span className="reduce-btn">{orderQuantity}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  increaseOrdQty(_id);
+                }}
+                className="increase-btn"
+              >
+                +
+              </button>
+            </span>{" "}
+            <Link to="/checkout">
+              <button className="btn btn-outline-primary" type="button">
+                Buy Now
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 

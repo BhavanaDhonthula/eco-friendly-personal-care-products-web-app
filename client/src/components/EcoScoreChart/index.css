@@ -1,0 +1,15 @@
+.radial-barChart-and-text-container {
+  display: flex;
+
+  align-items: center;
+  gap: 20px;
+}
+
+.eco-score-out-of-100 {
+  font-size: 20px;
+  color: #b3b6be;
+}
+
+.eco-score {
+  color: #09682a;
+}

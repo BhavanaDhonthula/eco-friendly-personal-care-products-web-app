@@ -5,7 +5,6 @@ const getProductData = async (id) => {
   if (response.ok) {
     const productData = await response.json();
     return productData;
-    console.log(productData);
   }
 
   return response.err_msg;
