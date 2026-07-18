@@ -183,10 +183,6 @@ const orderSchema = new Schema(
       required: true,
       default: 0,
     },
-    paymentMethod: {
-      type: String,
-      default: "COD",
-    },
     orderStatus: {
       type: String,
       enum: [

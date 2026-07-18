@@ -3,7 +3,7 @@ import "./index.css";
 const RefundPolicy = () => (
   <div className="policy-bg-container">
     <h1 className="fs-4 fw-bold">Refund Policy</h1>
-    <p>
+    <p className="policy-content">
       At EcoCare, customer satisfaction is our priority. If you are not
       completely satisfied with your purchase, we're here to help. Please read
       our refund policy carefully before requesting a refund. Eligibility for

@@ -4,6 +4,9 @@ import "./index.css";
 
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
+import { sendOtp, verifyOtp } from "../../services/otpApi";
+
+const MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 const Register = (props) => {
   const [username, setUsername] = useState("");
@@ -13,22 +16,97 @@ const Register = (props) => {
   const [errMSg, setErrMsg] = useState("");
   const navigate = useNavigate();
 
+  // ── Mobile OTP verification state ────────────────────────────────────────
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [mobileVerified, setMobileVerified] = useState(false);
+  const [mobileVerificationToken, setMobileVerificationToken] = useState("");
+  const [otpMsg, setOtpMsg] = useState("");
+
+  const isMobileValid = MOBILE_REGEX.test(mobileNumber);
+
+  const onChangeMobileNumber = (e) => {
+    setMobileNumber(e.target.value);
+    // Any change to the number invalidates a previous verification.
+    setMobileVerified(false);
+    setMobileVerificationToken("");
+    setOtpSent(false);
+    setOtp("");
+    setOtpMsg("");
+  };
+
+  const onClickSendOtp = async () => {
+    setOtpMsg("");
+    if (!isMobileValid) {
+      setOtpMsg("Enter a valid 10-digit mobile number first");
+      return;
+    }
+    setOtpSending(true);
+    try {
+      await sendOtp(mobileNumber);
+      setOtpSent(true);
+      setOtpMsg(
+        "OTP sent! Check your phone (or the server console in dev mode).",
+      );
+    } catch (error) {
+      setOtpMsg(error.message);
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const onClickVerifyOtp = async () => {
+    setOtpMsg("");
+    if (!otp) {
+      setOtpMsg("Enter the OTP");
+      return;
+    }
+    setOtpVerifying(true);
+    try {
+      const data = await verifyOtp(mobileNumber, otp);
+      setMobileVerified(true);
+      setMobileVerificationToken(data.mobileVerificationToken);
+      setOtpMsg("✅ Mobile number verified");
+    } catch (error) {
+      setOtpMsg(error.message);
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
   const register = async (e) => {
     e.preventDefault();
+
+    if (username === "") {
+      setErrMsg("Username required");
+      return;
+    }
+    if (email === "") {
+      setErrMsg("Email Required");
+      return;
+    }
+    if (password === "") {
+      setErrMsg("Password required");
+      return;
+    }
+    if (!isMobileValid) {
+      setErrMsg("Enter a valid 10-digit mobile number");
+      return;
+    }
+    if (!mobileVerified || !mobileVerificationToken) {
+      setErrMsg("Please verify your mobile number via OTP before registering");
+      return;
+    }
+
     const userData = {
       username,
       email,
       password,
       mobileNumber,
+      mobileVerificationToken,
     };
-
-    if (username === "") {
-      setErrMsg("Username required");
-    } else if (email === "") {
-      setErrMsg("Email Required");
-    } else if (password === "") {
-      setErrMsg("Password required");
-    }
 
     const url = "http://localhost:8000/register";
     const configOptions = {
@@ -39,9 +117,7 @@ const Register = (props) => {
       },
     };
     const response = await fetch(url, configOptions);
-    // console.log(response);
     const data = await response.json();
-    // console.log(data);
     if (response.ok) {
       navigate("/login", { replace: true });
 
@@ -50,7 +126,7 @@ const Register = (props) => {
       setPassword("");
       setMobileNumber("");
     } else {
-      console.log(data);
+      setErrMsg(data.err_msg || "Registration failed, please try again");
     }
   };
 
@@ -116,16 +192,65 @@ const Register = (props) => {
                       setPassword(e.target.value);
                     }}
                   />
-                  <input
-                    autoComplete="true"
-                    type="text"
-                    maxLength="10"
-                    placeholder="Mobile Number"
-                    className="form-control   fw-bold mt-4  p-2"
-                    onChange={(e) => {
-                      setMobileNumber(e.target.value);
-                    }}
-                  />
+
+                  {/* ── Mobile number + OTP verification ──────────────────── */}
+                  <div className="d-flex gap-2 mt-4">
+                    <input
+                      autoComplete="true"
+                      type="text"
+                      maxLength="10"
+                      placeholder="Mobile Number"
+                      value={mobileNumber}
+                      className="form-control fw-bold p-2"
+                      disabled={mobileVerified}
+                      onChange={onChangeMobileNumber}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-success fw-bold text-nowrap"
+                      disabled={!isMobileValid || mobileVerified || otpSending}
+                      onClick={onClickSendOtp}
+                    >
+                      {mobileVerified
+                        ? "Verified ✅"
+                        : otpSending
+                          ? "Sending..."
+                          : otpSent
+                            ? "Resend OTP"
+                            : "Send OTP"}
+                    </button>
+                  </div>
+
+                  {otpSent && !mobileVerified && (
+                    <div className="d-flex gap-2 mt-2">
+                      <input
+                        type="text"
+                        maxLength="6"
+                        placeholder="Enter OTP"
+                        value={otp}
+                        className="form-control fw-bold p-2"
+                        onChange={(e) => setOtp(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-success fw-bold text-nowrap"
+                        disabled={otpVerifying}
+                        onClick={onClickVerifyOtp}
+                      >
+                        {otpVerifying ? "Verifying..." : "Verify OTP"}
+                      </button>
+                    </div>
+                  )}
+
+                  {otpMsg && (
+                    <p
+                      className={`mt-2 fw-bold ${mobileVerified ? "text-success" : "text-danger"}`}
+                    >
+                      {otpMsg}
+                    </p>
+                  )}
+                  {/* ──────────────────────────────────────────────────────── */}
+
                   <div className="register-btn-container text-center mt-3">
                     <button className="btn p-2 fw-bold bg-success text-white">
                       Register

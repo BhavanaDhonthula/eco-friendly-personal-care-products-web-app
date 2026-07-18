@@ -7,10 +7,12 @@ const {
   addAddress,
   updateAddress,
   deleteAddress,
+  verifyPincodeHandler,
 } = require("../controllers/addressController");
 
 router.use(authenticateUserToken);
 
+router.get("/addresses/verify-pincode/:pincode", verifyPincodeHandler);
 router.get("/addresses", getAddresses);
 router.post("/addresses", addAddress);
 router.put("/addresses/:addressId", updateAddress);

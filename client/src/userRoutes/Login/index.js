@@ -5,6 +5,7 @@ import "./index.css";
 
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
+import { registerUserForPushNotifications } from "../../services/notificationApi";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +21,6 @@ const Login = () => {
       email,
       password,
     };
-
     const config = {
       method: "POST",
       headers: {
@@ -28,10 +28,8 @@ const Login = () => {
       },
       body: JSON.stringify(userData),
     };
-
     const response = await fetch("http://localhost:8000/login", config);
     const data = await response.json();
-
     if (response.ok) {
       Cookies.set("access_token", data.jwtToken, { expires: 30 });
       console.log(email[0]);
@@ -41,11 +39,15 @@ const Login = () => {
       updateEmail("");
       updatePassword("");
       navigate("/", { replace: true });
+
+      // Ask for notification permission & register this device for push
+      // notifications (order updates, new products). Fire-and-forget - a
+      // "no thanks" on the browser permission prompt shouldn't block login.
+      registerUserForPushNotifications();
     } else {
       setErrMsg(data.err_msg);
     }
   };
-
   return (
     <Popup
       open

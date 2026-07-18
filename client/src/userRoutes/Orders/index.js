@@ -401,9 +401,6 @@ const Orders = () => {
                       <span>Order Total</span>
                       <span>₹{order.orderTotal}</span>
                     </div>
-                    <p className="text-muted small mb-0 mt-1">
-                      Payment: {order.paymentMethod}
-                    </p>
                   </div>
 
                   {/* Shipping address */}

@@ -1,4 +1,81 @@
 const User = require("../models/User");
+const Seller = require("../models/Seller");
+const {
+  lookupPincode,
+  isValidPincodeFormat,
+} = require("../utils/pincodeService");
+
+// Given a resolved delivery state, checks the sellers behind the user's
+// current cart items and returns the names of any sellers that don't
+// service that state. Purely informational (doesn't block saving an
+// address) - the same address may be used for future orders with a
+// different cart.
+const findNonServiceableSellersForCart = async (userId, state) => {
+  if (!state) return [];
+
+  const user = await User.findById(userId, "cartItems");
+  if (!user || !user.cartItems.length) return [];
+
+  const sellerIds = [
+    ...new Set(user.cartItems.map((item) => item.sellerId.toString())),
+  ];
+
+  const sellers = await Seller.find(
+    { _id: { $in: sellerIds } },
+    "storeName nonServiceableStates",
+  );
+
+  return sellers
+    .filter((seller) =>
+      (seller.nonServiceableStates || []).some(
+        (blockedState) =>
+          blockedState.trim().toLowerCase() === state.trim().toLowerCase(),
+      ),
+    )
+    .map((seller) => seller.storeName);
+};
+
+// GET /addresses/verify-pincode/:pincode
+// Validates the PIN code is real (via the India Post API) and, if the user
+// currently has items in their cart, flags any sellers among those items
+// that don't deliver to the resolved state.
+const verifyPincodeHandler = async (req, res) => {
+  try {
+    const { pincode } = req.params;
+
+    if (!isValidPincodeFormat(pincode)) {
+      return res
+        .status(400)
+        .json({ valid: false, err_msg: "PIN code must be a 6-digit number" });
+    }
+
+    const lookupResult = await lookupPincode(pincode);
+    if (!lookupResult.valid) {
+      return res
+        .status(400)
+        .json({ valid: false, err_msg: lookupResult.reason });
+    }
+
+    const nonServiceableSellers = await findNonServiceableSellersForCart(
+      req.userId,
+      lookupResult.state,
+    );
+
+    return res.status(200).json({
+      valid: true,
+      city: lookupResult.city,
+      district: lookupResult.district,
+      state: lookupResult.state,
+      area: lookupResult.area,
+      nonServiceableSellers,
+    });
+  } catch (error) {
+    console.log("verifyPincodeHandler error:", error);
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
+  }
+};
 
 // GET /addresses - returns the logged-in user's saved addresses
 const getAddresses = async (req, res) => {
@@ -11,7 +88,9 @@ const getAddresses = async (req, res) => {
     return res.status(200).json(user.addresses);
   } catch (error) {
     console.log("getAddresses error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -39,8 +118,17 @@ const addAddress = async (req, res) => {
       !city ||
       !state
     ) {
-      return res.status(400).json({ err_msg: "Please fill all required fields" });
+      return res
+        .status(400)
+        .json({ err_msg: "Please fill all required fields" });
     }
+
+    // ── Validate PIN code (blocking) ────────────────────────────────────────
+    const lookupResult = await lookupPincode(pincode);
+    if (!lookupResult.valid) {
+      return res.status(400).json({ err_msg: lookupResult.reason });
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     const user = await User.findById(req.userId);
     if (!user) {
@@ -72,13 +160,22 @@ const addAddress = async (req, res) => {
     user.addresses.push(newAddress);
     await user.save();
 
+    // Non-blocking heads-up: does any seller in the current cart skip this state?
+    const nonServiceableSellers = await findNonServiceableSellersForCart(
+      req.userId,
+      lookupResult.state,
+    );
+
     return res.status(201).json({
       succ_msg: "Address added successfully",
       addresses: user.addresses,
+      nonServiceableSellers,
     });
   } catch (error) {
     console.log("addAddress error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -112,6 +209,16 @@ const updateAddress = async (req, res) => {
       return res.status(404).json({ err_msg: "Address not found" });
     }
 
+    // ── Validate PIN code (blocking) if it's being changed ──────────────────
+    let lookupResult = null;
+    if (pincode !== undefined && pincode !== address.pincode) {
+      lookupResult = await lookupPincode(pincode);
+      if (!lookupResult.valid) {
+        return res.status(400).json({ err_msg: lookupResult.reason });
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     if (fullName !== undefined) address.fullName = fullName;
     if (mobileNumber !== undefined) address.mobileNumber = mobileNumber;
     if (pincode !== undefined) address.pincode = pincode;
@@ -124,20 +231,26 @@ const updateAddress = async (req, res) => {
 
     if (isDefault) {
       user.addresses.forEach((eachAddress) => {
-        eachAddress.isDefault =
-          eachAddress._id.toString() === addressId;
+        eachAddress.isDefault = eachAddress._id.toString() === addressId;
       });
     }
 
     await user.save();
 
+    const nonServiceableSellers = lookupResult
+      ? await findNonServiceableSellersForCart(req.userId, lookupResult.state)
+      : [];
+
     return res.status(200).json({
       succ_msg: "Address updated successfully",
       addresses: user.addresses,
+      nonServiceableSellers,
     });
   } catch (error) {
     console.log("updateAddress error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -173,8 +286,16 @@ const deleteAddress = async (req, res) => {
     });
   } catch (error) {
     console.log("deleteAddress error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
-module.exports = { getAddresses, addAddress, updateAddress, deleteAddress };
+module.exports = {
+  getAddresses,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  verifyPincodeHandler,
+};

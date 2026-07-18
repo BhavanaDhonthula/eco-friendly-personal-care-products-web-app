@@ -27,6 +27,10 @@ const cartItemSchema = new Schema(
       type: Number,
       required: true,
     },
+    quantity: {
+      type: String,
+      required: true,
+    },
     thumbnail: {
       type: String,
     },
@@ -105,6 +109,19 @@ const userSchema = new Schema(
     },
     mobileNumber: {
       type: String,
+    },
+    // Set true once the mobile number has been confirmed via OTP at
+    // registration (see server/utils/otpService.js).
+    mobileVerified: {
+      type: Boolean,
+      default: false,
+    },
+    // Firebase Cloud Messaging device tokens this user is logged in on.
+    // A user can have several (phone + laptop browser, etc), so we keep an
+    // array and push notifications go out to all of them.
+    fcmTokens: {
+      type: [String],
+      default: [],
     },
     cartItems: {
       type: [cartItemSchema],

@@ -2,14 +2,16 @@ import "./index.css";
 import { FaStar } from "react-icons/fa";
 import { GiChestnutLeaf } from "react-icons/gi";
 import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import CartContext from "../../services/contexts/CartContext";
 import calculateEcoScore from "../../services/calculateEcoScore";
 
 const ProductCard = (props) => {
   const url = "http://localhost:8000/major-project-imgs/";
+
   const { productDetails } = props;
-  const { productName, price, thumbnail, _id, brand, stock } = productDetails;
+  const { productName, price, thumbnail, _id, brand, stock, sellerEcoStatus } =
+    productDetails;
 
   const cartContextValue = useContext(CartContext);
   const { addToCart } = cartContextValue;
@@ -20,6 +22,15 @@ const ProductCard = (props) => {
     (item) => item._id === _id,
   );
 
+  // Show More / Show Less state
+  const [showFullName, setShowFullName] = useState(false);
+  const MAX_LENGTH = 30;
+
+  const displayedProductName =
+    showFullName || productName.length <= MAX_LENGTH
+      ? productName
+      : productName.slice(0, MAX_LENGTH) + "...";
+
   return (
     <div className="product-card-container p-3 m-1">
       <div className="product-img-container">
@@ -29,38 +40,77 @@ const ProductCard = (props) => {
           alt="product img"
         />
       </div>
+
       <div className="product-details-container">
-        <h1 className="fw-bold product-name pt-2">{productName}</h1>
+        {/* Product Name */}
+        <div>
+          <h1 className="fw-bold product-name pt-2 pb-0">
+            {displayedProductName}
+          </h1>
+
+          {productName.length > MAX_LENGTH && (
+            <button
+              type="button"
+              className="btn btn-link p-0 text-decoration-none fw-bold"
+              onClick={() => setShowFullName((prev) => !prev)}
+            >
+              {showFullName ? "Show Less" : "Show More"}
+            </button>
+          )}
+        </div>
+
+        {/* Brand */}
         <h6 className="product-brand">Sold by: {brand}</h6>
+
+        {/* Seller Eco Status */}
+        {sellerEcoStatus && sellerEcoStatus !== "Not Verified" && (
+          <span
+            className={`badge mb-1 ${
+              sellerEcoStatus === "Verified Eco Seller"
+                ? "bg-success"
+                : "bg-warning text-dark"
+            }`}
+          >
+            🌿 {sellerEcoStatus}
+          </span>
+        )}
+
+        {/* Eco Score */}
         <h5 className="text-dark fw-bold">
           Eco-Score:
           <span
-            className={`fw-bolder
-            ${
-              (ecoScore >= 80 && "text-success") ||
-              ((ecoScore >= 50) & (ecoScore < 80) && "text-warning") ||
-              (ecoScore < 50 && "text-danger")
+            className={`fw-bolder ${
+              ecoScore >= 80
+                ? "text-success"
+                : ecoScore >= 50
+                  ? "text-warning"
+                  : "text-danger"
             }`}
           >
             <GiChestnutLeaf size={20} className="leaf" />
-            <span className="eco-score">{ecoScore} </span>
+            <span className="eco-score">{ecoScore}</span>
           </span>
         </h5>
 
+        {/* Price */}
         <h5 className="fw-bold text-success product-price pt-2 pb-2">
           ₹{price}
         </h5>
 
+        {/* Stock */}
         <p className="fw-bold text-success product-price pt-1 pb-1">
           {stock === 0 ? (
             <span className="bg-danger border-0 text-white p-2 rounded-2">
               Out Of Stock
             </span>
           ) : (
-            <span className="bg-success border-0 text-white p-2 rounded-2">{`Stock Available: ${stock}`}</span>
+            <span className="bg-success border-0 text-white p-2 rounded-2">
+              Stock Available: {stock}
+            </span>
           )}
         </p>
 
+        {/* View Details Button */}
         <div className="btn-container w-100">
           <Link
             to={`/productDetailsPage/${_id}`}
@@ -69,8 +119,10 @@ const ProductCard = (props) => {
             View Details
           </Link>
         </div>
+
+        {/* Add to Cart Button */}
         <div className="btn-container w-100">
-          {itemPresentInCart !== undefined ? (
+          {itemPresentInCart ? (
             <div
               className="disabled-btn-container"
               style={{ cursor: "not-allowed" }}
@@ -81,9 +133,7 @@ const ProductCard = (props) => {
                 disabled
               >
                 Added To Cart
-                <span>
-                  <FaStar className="star-icon" />
-                </span>
+                <FaStar className="star-icon ms-2" />
               </button>
             </div>
           ) : (

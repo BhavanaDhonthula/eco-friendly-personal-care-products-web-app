@@ -1,4 +1,7 @@
 const Seller = require("../models/Seller");
+const User = require("../models/User");
+const { sendPushNotification } = require("../utils/pushNotification");
+const { sendBulkSms } = require("../utils/smsNotification");
 
 // GET /products
 // Returns a flattened list of all products from all sellers, each
@@ -6,13 +9,17 @@ const Seller = require("../models/Seller");
 // reference back to the seller that owns the product.
 const getAllProducts = async (req, res) => {
   try {
-    const sellers = await Seller.find({}, "storeName products");
+    const sellers = await Seller.find(
+      {},
+      "storeName products ecoVerificationStatus",
+    );
 
     let allProducts = sellers.flatMap((seller) =>
       seller.products.map((product) => ({
         ...product.toObject(),
         sellerId: seller._id,
         sellerName: seller.storeName,
+        sellerEcoStatus: seller.ecoVerificationStatus,
       })),
     );
 
@@ -58,7 +65,7 @@ const getProductById = async (req, res) => {
 
     const seller = await Seller.findOne(
       { "products._id": id },
-      "storeName products",
+      "storeName products ecoVerificationStatus",
     );
 
     if (!seller) {
@@ -77,6 +84,7 @@ const getProductById = async (req, res) => {
       ...product.toObject(),
       sellerId: seller._id,
       sellerName: seller.storeName,
+      sellerEcoStatus: seller.ecoVerificationStatus,
     };
 
     return res.status(200).json([productData]);
@@ -171,6 +179,39 @@ const addProduct = async (req, res) => {
     seller.products.push(newProduct);
     await seller.save();
 
+    // ── Notify users: new product added ─────────────────────────────────────
+    // Fire-and-forget: don't block/fail the response if push notifications
+    // aren't configured yet or a send fails. sendPushNotification always
+    // logs what happened (including "no devices registered yet"), so check
+    // the server console to confirm this fired.
+    User.find({}, "fcmTokens mobileNumber")
+      .then((allUsers) => {
+        const allTokens = allUsers.flatMap((u) => u.fcmTokens || []);
+        sendPushNotification(allTokens, {
+          title: "New product added 🌱",
+          body: `${seller.storeName} just added "${productName}" to the store`,
+          data: {
+            type: "NEW_PRODUCT",
+            productId:
+              seller.products[seller.products.length - 1]._id.toString(),
+            sellerId: seller._id.toString(),
+          },
+        });
+
+        // NOTE: fires one SMS per registered user, per product. That's
+        // real money once Twilio is live - fine for now since you asked
+        // for it, but worth reconsidering before this ships to production.
+        const allMobileNumbers = allUsers.map((u) => u.mobileNumber);
+        sendBulkSms(
+          allMobileNumbers,
+          `EcoGlow: ${seller.storeName} just added "${productName}". Check it out!`,
+        );
+      })
+      .catch((error) =>
+        console.log("new-product notification error:", error.message),
+      );
+    // ─────────────────────────────────────────────────────────────────────
+
     return res.status(201).json({ succ_msg: "Product added successfully" });
   } catch (error) {
     console.log("addProduct error:", error);
@@ -203,7 +244,7 @@ const getSellerProfile = async (req, res) => {
   try {
     const seller = await Seller.findById(
       req.sellerId,
-      "storeName email storeLogo",
+      "storeName email storeLogo mobileNumber mobileVerified businessAddress gstNumber businessType sustainabilityCertifications packagingCommitment sourcingPractice carbonNeutralShipping ecoVerificationScore ecoVerificationStatus",
     );
     if (!seller) {
       return res.status(404).json({ err_msg: "Seller not found" });

@@ -32,7 +32,7 @@ export const createAddress = async (addressDetails) => {
   const data = await response.json();
 
   if (response.ok) {
-    return data.addresses;
+    return data;
   }
 
   throw new Error(data.err_msg || "Unable to add address");
@@ -47,7 +47,7 @@ export const editAddress = async (addressId, addressDetails) => {
   const data = await response.json();
 
   if (response.ok) {
-    return data.addresses;
+    return data;
   }
 
   throw new Error(data.err_msg || "Unable to update address");
@@ -65,4 +65,21 @@ export const removeAddress = async (addressId) => {
   }
 
   throw new Error(data.err_msg || "Unable to remove address");
+};
+
+// GET /addresses/verify-pincode/:pincode
+// Validates the PIN code is real and flags any sellers in the current cart
+// that don't deliver to the resolved state.
+export const verifyPincode = async (pincode) => {
+  const response = await fetch(
+    `${BASE_URL}/addresses/verify-pincode/${pincode}`,
+    { headers: getAuthHeaders() },
+  );
+  const data = await response.json();
+
+  if (response.ok) {
+    return data;
+  }
+
+  throw new Error(data.err_msg || "Unable to verify PIN code");
 };

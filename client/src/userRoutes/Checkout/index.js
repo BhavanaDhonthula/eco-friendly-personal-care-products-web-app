@@ -1,22 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./index.css";
-import Cookies from "js-cookie";
 import { fetchAddresses } from "../../services/addressApi";
 import { placeOrder } from "../../services/orderApi";
+import CartContext from "../../services/contexts/CartContext";
 
+const IMG_BASE = "http://localhost:8000/major-project-imgs/";
 const DELIVERY_CHARGE = 40;
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const { cartItems, isCartLoading } = useContext(CartContext);
 
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelected] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("COD");
   const [isPlacing, setIsPlacing] = useState(false);
   const [placeError, setPlaceError] = useState("");
   const [loadingAddr, setLoadingAddr] = useState(true);
-  const [cartItems, setCartItems] = useState([]);
+
+  // ── Order summary: itemized products + grand total ──────────────────────
+  // Delivery is charged per seller (matches how the backend splits one
+  // checkout into one order per seller - see placeOrder in
+  // orderController.js), so we count distinct sellers in the cart.
+  const subTotal = cartItems.reduce(
+    (total, item) => total + item.price * item.orderQuantity,
+    0,
+  );
+  const numberOfSellers = new Set(
+    cartItems.map((item) => item.sellerId?.toString()),
+  ).size;
+  const deliveryCharges = DELIVERY_CHARGE * Math.max(numberOfSellers, 1);
+  const grandTotal = subTotal + deliveryCharges;
+  // ─────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     // Load saved addresses
@@ -30,22 +45,13 @@ const Checkout = () => {
       setLoadingAddr(false);
     };
     load();
-
-    // Read cart from context via localStorage snapshot (safe fallback)
-    // The real cart is managed by CartContext; we read it here for summary display
   }, []);
 
-  const onPaymentClick = (method) => {
-    if (method !== "COD") {
-      alert(
-        "Online payment is coming soon! Please use Cash on Delivery for now.",
-      );
+  const onPlaceOrder = async () => {
+    if (cartItems.length === 0) {
+      setPlaceError("Your cart is empty.");
       return;
     }
-    setPaymentMethod("COD");
-  };
-
-  const onPlaceOrder = async () => {
     if (!selectedAddressId) {
       setPlaceError("Please select a delivery address.");
       return;
@@ -149,101 +155,90 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* Payment method */}
+          {/* Items*/}
           <div className="checkout-card card shadow-sm mb-4">
             <div className="card-body">
-              <h5 className="fw-bold text-success mb-3">💳 Payment Method</h5>
+              <h5 className="fw-bold text-success mb-3">
+                🛍️ Order Items ({cartItems.length})
+              </h5>
 
-              {/* COD — active */}
-              <div
-                className="payment-option p-3 mb-2 rounded border border-success bg-light d-flex align-items-center gap-3"
-                onClick={() => setPaymentMethod("COD")}
-                style={{ cursor: "pointer" }}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  className="form-check-input"
-                  checked={paymentMethod === "COD"}
-                  readOnly
-                />
-                <span style={{ fontSize: "1.3rem" }}>💵</span>
+              {isCartLoading ? (
+                <p className="text-muted small mb-0">Loading your cart…</p>
+              ) : cartItems.length === 0 ? (
                 <div>
-                  <span className="fw-semibold">Cash on Delivery</span>
-                  <span
-                    className="badge bg-success ms-2"
-                    style={{ fontSize: "0.7rem" }}
+                  <p className="text-muted mb-2">Your cart is empty.</p>
+                  <Link
+                    to="/products"
+                    className="btn btn-outline-success btn-sm"
                   >
-                    Available
-                  </span>
+                    Browse Products
+                  </Link>
                 </div>
-              </div>
-
-              {/* UPI — coming soon */}
-              <div
-                className="payment-option payment-disabled p-3 mb-2 rounded border d-flex align-items-center gap-3"
-                onClick={() => onPaymentClick("UPI")}
-                style={{ cursor: "pointer", opacity: 0.6 }}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  className="form-check-input"
-                  disabled
-                />
-                <span style={{ fontSize: "1.3rem" }}>📱</span>
-                <div>
-                  <span className="fw-semibold text-muted">UPI</span>
-                  <span
-                    className="badge bg-secondary ms-2"
-                    style={{ fontSize: "0.7rem" }}
-                  >
-                    Coming Soon
-                  </span>
-                </div>
-              </div>
-
-              {/* Card — coming soon */}
-              <div
-                className="payment-option payment-disabled p-3 rounded border d-flex align-items-center gap-3"
-                onClick={() => onPaymentClick("CARD")}
-                style={{ cursor: "pointer", opacity: 0.6 }}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  className="form-check-input"
-                  disabled
-                />
-                <span style={{ fontSize: "1.3rem" }}>💳</span>
-                <div>
-                  <span className="fw-semibold text-muted">
-                    Credit / Debit Card
-                  </span>
-                  <span
-                    className="badge bg-secondary ms-2"
-                    style={{ fontSize: "0.7rem" }}
-                  >
-                    Coming Soon
-                  </span>
-                </div>
-              </div>
+              ) : (
+                <ul className="list-unstyled mb-0">
+                  {cartItems.map((item) => (
+                    <li
+                      key={item.cartItemId || item._id}
+                      className="d-flex align-items-center gap-3 py-2 border-bottom"
+                    >
+                      <img
+                        src={`${IMG_BASE}${item.thumbnail}`}
+                        alt={item.productName}
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          objectFit: "cover",
+                          borderRadius: "6px",
+                        }}
+                      />
+                      <div className="flex-grow-1">
+                        <p className="fw-semibold mb-0 small">
+                          {item.productName}
+                        </p>
+                        <p
+                          className="text-muted mb-0"
+                          style={{ fontSize: "0.8rem" }}
+                        >
+                          {item.brand ? `${item.brand} · ` : ""}₹{item.price} ×{" "}
+                          {item.orderQuantity}
+                        </p>
+                      </div>
+                      <span className="fw-bold small text-nowrap">
+                        ₹{item.price * item.orderQuantity}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
+
+          {/* Payment method */}
         </div>
 
-        {/* ── Right: place order summary ───────────────────────── */}
+        {/* ── Right: order items + place order summary ─────────── */}
         <div className="col-12 col-lg-5">
+          {/* Order items */}
+
+          {/* Price summary + place order */}
           <div className="checkout-card card shadow-sm">
             <div className="card-body">
-              <h5 className="fw-bold text-success mb-3">🛒 Place Order</h5>
-              <p className="text-muted small mb-3">
-                Items total and delivery charges are calculated at checkout.
-              </p>
+              <h5 className="fw-bold text-success mb-3">💰 Price Summary</h5>
 
               <div className="d-flex justify-content-between mb-1 small">
-                <span>Delivery Charges</span>
-                <span>₹{DELIVERY_CHARGE} per seller</span>
+                <span>
+                  Items Subtotal ({cartItems.length}{" "}
+                  {cartItems.length === 1 ? "item" : "items"})
+                </span>
+                <span>₹{subTotal}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-1 small">
+                <span>
+                  Delivery Charges (₹{DELIVERY_CHARGE} ×{" "}
+                  {Math.max(numberOfSellers, 1)}{" "}
+                  {numberOfSellers === 1 ? "seller" : "sellers"})
+                </span>
+                <span>₹{deliveryCharges}</span>
               </div>
               <div className="d-flex justify-content-between mb-1 small">
                 <span>Payment</span>
@@ -251,6 +246,11 @@ const Checkout = () => {
               </div>
 
               <hr />
+
+              <div className="d-flex justify-content-between mb-3">
+                <span className="fw-bold fs-5">Grand Total</span>
+                <span className="fw-bold fs-5 text-success">₹{grandTotal}</span>
+              </div>
 
               {placeError && (
                 <div className="alert alert-danger py-2 small fw-bold">
@@ -261,7 +261,9 @@ const Checkout = () => {
               <button
                 className="btn btn-success w-100 fw-bold"
                 onClick={onPlaceOrder}
-                disabled={isPlacing || !selectedAddressId}
+                disabled={
+                  isPlacing || !selectedAddressId || cartItems.length === 0
+                }
               >
                 {isPlacing ? (
                   <>
@@ -269,7 +271,7 @@ const Checkout = () => {
                     Placing Order…
                   </>
                 ) : (
-                  "Place Order (COD)"
+                  `Place Order (COD) · ₹${grandTotal}`
                 )}
               </button>
 

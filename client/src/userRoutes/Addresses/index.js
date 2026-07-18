@@ -6,6 +6,7 @@ import {
   createAddress,
   editAddress,
   removeAddress,
+  verifyPincode,
 } from "../../services/addressApi";
 
 const initialFormState = {
@@ -34,6 +35,41 @@ const Addresses = () => {
   const [formData, setFormData] = useState(initialFormState);
   const [errMsg, setErrMsg] = useState("");
 
+  // ── PIN code validation state ────────────────────────────────────────────
+  // status: "idle" | "checking" | "valid" | "invalid"
+  const [pincodeStatus, setPincodeStatus] = useState("idle");
+  const [pincodeMsg, setPincodeMsg] = useState("");
+  const [nonServiceableSellers, setNonServiceableSellers] = useState([]);
+
+  const onBlurPincode = async () => {
+    const pincode = formData.pincode;
+    if (!/^[1-9]\d{5}$/.test(pincode)) {
+      setPincodeStatus("invalid");
+      setPincodeMsg("PIN code must be a 6-digit number");
+      return;
+    }
+
+    setPincodeStatus("checking");
+    setPincodeMsg("Checking PIN code...");
+    try {
+      const result = await verifyPincode(pincode);
+      setPincodeStatus("valid");
+      setPincodeMsg(`Delivers to ${result.area}, ${result.city}`);
+      setNonServiceableSellers(result.nonServiceableSellers || []);
+      // Auto-fill city/state from the resolved PIN code if left blank.
+      setFormData((prev) => ({
+        ...prev,
+        city: prev.city || result.city,
+        state: prev.state || result.state,
+      }));
+    } catch (error) {
+      setPincodeStatus("invalid");
+      setPincodeMsg(error.message);
+      setNonServiceableSellers([]);
+    }
+  };
+  // ─────────────────────────────────────────────────────────────────────
+
   const loadAddresses = async () => {
     setIsLoading(true);
     const data = await fetchAddresses();
@@ -54,6 +90,9 @@ const Addresses = () => {
     setEditingAddressId(null);
     setIsFormOpen(false);
     setErrMsg("");
+    setPincodeStatus("idle");
+    setPincodeMsg("");
+    setNonServiceableSellers([]);
   };
 
   const onClickEdit = (address) => {
@@ -71,6 +110,9 @@ const Addresses = () => {
     });
     setEditingAddressId(address._id);
     setIsFormOpen(true);
+    setPincodeStatus("idle");
+    setPincodeMsg("");
+    setNonServiceableSellers([]);
   };
 
   const onClickDelete = async (addressId) => {
@@ -100,15 +142,23 @@ const Addresses = () => {
       return;
     }
 
+    if (pincodeStatus === "invalid") {
+      setErrMsg(pincodeMsg || "Please enter a valid PIN code");
+      return;
+    }
+
     try {
-      let updatedAddresses;
+      let response;
       if (editingAddressId) {
-        updatedAddresses = await editAddress(editingAddressId, formData);
+        response = await editAddress(editingAddressId, formData);
       } else {
-        updatedAddresses = await createAddress(formData);
+        response = await createAddress(formData);
       }
-      setAddresses(updatedAddresses);
+      setAddresses(response.addresses);
       resetForm();
+      if (response.nonServiceableSellers?.length) {
+        setNonServiceableSellers(response.nonServiceableSellers);
+      }
     } catch (error) {
       setErrMsg(error.message);
     }
@@ -182,11 +232,35 @@ const Addresses = () => {
                   <input
                     type="text"
                     maxLength="6"
-                    className="form-control"
+                    className={`form-control ${
+                      pincodeStatus === "invalid"
+                        ? "is-invalid"
+                        : pincodeStatus === "valid"
+                          ? "is-valid"
+                          : ""
+                    }`}
                     placeholder="Pincode"
                     value={formData.pincode}
-                    onChange={onChangeField("pincode")}
+                    onChange={(e) => {
+                      onChangeField("pincode")(e);
+                      setPincodeStatus("idle");
+                      setPincodeMsg("");
+                    }}
+                    onBlur={onBlurPincode}
                   />
+                  {pincodeMsg && (
+                    <small
+                      className={
+                        pincodeStatus === "invalid"
+                          ? "text-danger"
+                          : pincodeStatus === "checking"
+                            ? "text-muted"
+                            : "text-success"
+                      }
+                    >
+                      {pincodeMsg}
+                    </small>
+                  )}
                 </div>
                 <div className="col-12 col-md-6">
                   <input
@@ -268,6 +342,17 @@ const Addresses = () => {
                 </div>
               </div>
 
+              {nonServiceableSellers.length > 0 && (
+                <p className="text-warning fw-bold mt-2 mb-0">
+                  ⚠️ Heads up: {nonServiceableSellers.join(", ")} currently
+                  {nonServiceableSellers.length === 1
+                    ? " doesn't"
+                    : " don't"}{" "}
+                  deliver to this PIN code's state. You can still save this
+                  address for other orders.
+                </p>
+              )}
+
               {errMsg && <p className="text-danger fw-bold mt-2">{errMsg}</p>}
 
               <div className="d-flex gap-2 mt-3">
@@ -283,6 +368,27 @@ const Addresses = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {!isFormOpen && nonServiceableSellers.length > 0 && (
+        <div className="row mt-3">
+          <div className="col-12">
+            <div className="alert alert-warning fw-bold d-flex justify-content-between align-items-center">
+              <span>
+                ⚠️ {nonServiceableSellers.join(", ")}{" "}
+                {nonServiceableSellers.length === 1 ? "doesn't" : "don't"}{" "}
+                currently deliver to this address's state. Saved anyway for
+                future orders.
+              </span>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Dismiss"
+                onClick={() => setNonServiceableSellers([])}
+              ></button>
+            </div>
           </div>
         </div>
       )}

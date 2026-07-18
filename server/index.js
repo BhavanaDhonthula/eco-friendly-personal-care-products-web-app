@@ -9,6 +9,8 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const addressRoutes = require("./routes/addressRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const otpRoutes = require("./routes/otpRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -22,6 +24,8 @@ app.use(
 );
 
 app.use("/", authRoutes);
+app.use("/", otpRoutes);
+app.use("/", notificationRoutes);
 
 // FIX: orderRoutes must be mounted BEFORE productRoutes.
 // productRoutes registers GET /products which Express matches against

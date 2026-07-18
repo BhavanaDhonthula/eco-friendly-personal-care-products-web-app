@@ -363,7 +363,11 @@ const ProductDetailsPage = () => {
                       </span>
                     </td>
                     <td className="product-details-page-side-heading text-start ms-2">
-                      {specifications}
+                      {specifications?.map((each, index) => (
+                        <li type="circle" key={index}>
+                          {each}
+                        </li>
+                      ))}
                     </td>
                   </tr>
                   <tr>
@@ -385,7 +389,11 @@ const ProductDetailsPage = () => {
                       </span>
                     </td>
                     <td className="product-details-page-side-heading text-start ms-2">
-                      {ingredients}
+                      {ingredients?.map((each) => (
+                        <li key={each} type="disc">
+                          {each}
+                        </li>
+                      ))}
                     </td>
                   </tr>
                   <tr>

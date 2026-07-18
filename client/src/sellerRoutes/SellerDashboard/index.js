@@ -299,7 +299,7 @@ const SellerDashboard = () => {
     <div className="seller-dashboard-container container mt-4 mb-5">
       {/* ── Profile Card ─────────────────────────────────────────── */}
       {profile && (
-        <div className="seller-profile-card d-flex align-items-center gap-3 border rounded p-3 shadow-sm mb-4">
+        <div className="seller-profile-card d-flex align-items-center gap-3 border rounded p-3 shadow-sm mb-4 flex-wrap">
           {profile.storeLogo ? (
             <img
               src={`${IMG_BASE}${profile.storeLogo}`}
@@ -312,8 +312,39 @@ const SellerDashboard = () => {
             </div>
           )}
           <div className="text-start">
-            <h4 className="fw-bold mb-0">{profile.storeName}</h4>
+            <h4 className="fw-bold mb-0 d-flex align-items-center gap-2 flex-wrap">
+              {profile.storeName}
+              {profile.ecoVerificationStatus && (
+                <span
+                  className={`badge ${
+                    profile.ecoVerificationStatus === "Verified Eco Seller"
+                      ? "bg-success"
+                      : profile.ecoVerificationStatus === "Eco-Conscious Seller"
+                        ? "bg-warning text-dark"
+                        : "bg-secondary"
+                  }`}
+                  title={`Eco score: ${profile.ecoVerificationScore ?? 0}/100`}
+                >
+                  🌿 {profile.ecoVerificationStatus}
+                </span>
+              )}
+              {profile.mobileVerified && (
+                <span className="badge bg-info text-dark">
+                  📱 Mobile Verified
+                </span>
+              )}
+            </h4>
             <p className="text-muted mb-0">{profile.email}</p>
+            {profile.mobileNumber && (
+              <p className="text-muted mb-0">📞 {profile.mobileNumber}</p>
+            )}
+            {profile.businessAddress && (
+              <p className="text-muted mb-0">
+                📍 {profile.businessAddress.city},{" "}
+                {profile.businessAddress.state} -{" "}
+                {profile.businessAddress.pincode}
+              </p>
+            )}
           </div>
         </div>
       )}

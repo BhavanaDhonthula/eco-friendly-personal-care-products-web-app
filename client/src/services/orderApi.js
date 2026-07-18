@@ -10,11 +10,11 @@ const getAuthHeaders = () => {
   };
 };
 
-export const placeOrder = async (addressId, paymentMethod) => {
+export const placeOrder = async (addressId) => {
   const response = await fetch(`${BASE_URL}/checkout`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ addressId, paymentMethod }),
+    body: JSON.stringify({ addressId }),
   });
   const data = await response.json();
 

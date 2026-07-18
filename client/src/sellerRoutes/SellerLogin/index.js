@@ -5,6 +5,7 @@ import "./index.css";
 
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
+import { registerSellerForPushNotifications } from "../../services/notificationApi";
 
 const SellerLogin = () => {
   const [storeName, setStoreName] = useState("");
@@ -40,6 +41,10 @@ const SellerLogin = () => {
       Cookies.set("seller_access_token", data.sellerJwtToken, { expires: 30 });
       navigate("/seller-dashboard", { replace: true });
       console.log(data.sellerJwtToken);
+
+      // Fire-and-forget: register this device for order/dashboard push
+      // notifications.
+      registerSellerForPushNotifications();
     } else {
       console.log(data);
     }

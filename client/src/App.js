@@ -136,7 +136,15 @@ function App() {
             </Route>
           </Route>
           <Route element={<SellerLayout />}>
-            <Route exact path="/seller-register" element={<SellerRegister />} />
+            <Route
+              exact
+              path="/seller-register"
+              element={
+                <ProtectedRoute>
+                  <SellerRegister />
+                </ProtectedRoute>
+              }
+            />
             <Route exact path="/seller-login" element={<SellerLogin />} />
             <Route
               exact

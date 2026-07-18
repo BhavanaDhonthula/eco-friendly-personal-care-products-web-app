@@ -14,11 +14,9 @@
   margin-bottom: 5px;
 }
 
-
-
 .product-card-container {
   width: 280px !important;
-  /* height: 500px !important; */
+  /* height: 570px !important; */
   display: flex;
   padding: 10px;
   flex-direction: column;
@@ -40,4 +38,17 @@
 
 .leaf {
   margin: 0px 4px !important;
+}
+
+.show-more-btn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #198754;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.show-more-btn:hover {
+  text-decoration: underline;
 }

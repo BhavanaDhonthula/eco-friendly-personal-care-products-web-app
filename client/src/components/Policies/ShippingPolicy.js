@@ -3,7 +3,7 @@ import "./index.css";
 const ShippingPolicy = () => (
   <div className="policy-bg-container">
     <h1 className="fs-4 fw-bold">Shipping Policy</h1>
-    <p>
+    <p className="policy-content">
       Shipping Policy At EcoCare, we are committed to delivering your
       eco-friendly personal care products safely and on time. Please read our
       shipping policy to understand how we process and deliver your orders.

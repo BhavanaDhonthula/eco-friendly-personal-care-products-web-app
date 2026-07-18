@@ -12,7 +12,9 @@ const getCart = async (req, res) => {
     return res.status(200).json(user.cartItems);
   } catch (error) {
     console.log("getCart error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -64,6 +66,7 @@ const addToCart = async (req, res) => {
         productName: product.productName,
         brand: product.brand,
         price: product.price,
+        quantity: product.quantity,
         thumbnail: product.thumbnail,
         orderQuantity: 1,
       });
@@ -77,7 +80,9 @@ const addToCart = async (req, res) => {
     });
   } catch (error) {
     console.log("addToCart error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -125,7 +130,9 @@ const updateCartItem = async (req, res) => {
     });
   } catch (error) {
     console.log("updateCartItem error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -151,7 +158,9 @@ const removeFromCart = async (req, res) => {
     });
   } catch (error) {
     console.log("removeFromCart error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 
@@ -169,7 +178,9 @@ const clearCart = async (req, res) => {
     return res.status(200).json({ succ_msg: "Cart cleared", cartItems: [] });
   } catch (error) {
     console.log("clearCart error:", error);
-    return res.status(500).json({ err_msg: "Something went wrong, please try again" });
+    return res
+      .status(500)
+      .json({ err_msg: "Something went wrong, please try again" });
   }
 };
 

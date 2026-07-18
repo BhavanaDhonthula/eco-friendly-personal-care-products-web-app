@@ -1,6 +1,8 @@
 const crypto = require("crypto");
 const User = require("../models/User");
 const Seller = require("../models/Seller");
+const { sendPushNotification } = require("../utils/pushNotification");
+const { sendSms } = require("../utils/smsNotification");
 
 const DELIVERY_CHARGES = 40;
 
@@ -9,13 +11,13 @@ const generateOrderId = () =>
   `ORD-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
 
 // POST /checkout
-// body: { addressId, paymentMethod }
+// body: { addressId }
 // Reads the user's cartItems, groups them by seller, validates stock,
 // decrements product quantities, pushes an order sub-document into each
 // affected seller, then clears the user's cart.
 const placeOrder = async (req, res) => {
   try {
-    const { addressId, paymentMethod } = req.body;
+    const { addressId } = req.body;
 
     const user = await User.findById(req.userId);
     if (!user) {
@@ -142,7 +144,6 @@ const placeOrder = async (req, res) => {
         itemsTotal: sellerItemsTotal,
         deliveryCharges: DELIVERY_CHARGES,
         orderTotal: sellerItemsTotal + DELIVERY_CHARGES,
-        paymentMethod: paymentMethod === "ONLINE" ? "ONLINE" : "COD",
         orderStatus: "Placed",
       };
 
@@ -261,6 +262,52 @@ const updateOrderStatus = async (req, res) => {
 
     order.orderStatus = orderStatus;
     await seller.save();
+
+    // Orders can have multiple items - build a short readable summary,
+    // e.g. "Bamboo Toothbrush" or "Bamboo Toothbrush and 2 more items".
+    const productNames = order.items.map((item) => item.productName);
+    const productSummary =
+      productNames.length > 1
+        ? `${productNames[0]} and ${productNames.length - 1} more item${
+            productNames.length - 1 > 1 ? "s" : ""
+          }`
+        : productNames[0] || "your item";
+
+    // ── Notify the customer: order status changed ─────────────────────────
+    // Fire-and-forget: don't block/fail the response if push notifications
+    // aren't configured yet or a send fails. sendPushNotification always
+    // logs what happened (including "no devices registered yet"), so check
+    // the server console to confirm this fired.
+
+    // ── Notify the customer: order status changed ─────────────────────────
+    // Fire-and-forget: don't block/fail the response if push notifications
+    // aren't configured yet or a send fails. sendPushNotification always
+    // logs what happened (including "no devices registered yet"), so check
+    // the server console to confirm this fired.
+
+    User.findById(order.userId, "fcmTokens mobileNumber")
+      .then((user) => {
+        sendPushNotification(user?.fcmTokens || [], {
+          title: "Order status updated 📦",
+          body: `${productSummary} (order ${order.orderId}) is now "${orderStatus}"`,
+          data: {
+            type: "ORDER_STATUS",
+            orderId: order._id.toString(),
+            orderStatus,
+          },
+        });
+
+        if (user?.mobileNumber) {
+          sendSms(
+            user.mobileNumber,
+            `EcoGlow: ${productSummary} (order ${order.orderId}) is now "${orderStatus}".`,
+          );
+        }
+      })
+      .catch((error) =>
+        console.log("order-status notification error:", error.message),
+      );
+    // ───────────────────────────────────────────────────────────────────────
 
     return res
       .status(200)
