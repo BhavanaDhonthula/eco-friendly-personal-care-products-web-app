@@ -3,13 +3,10 @@ const User = require("../models/User");
 const Seller = require("../models/Seller");
 const { sendPushNotification } = require("../utils/pushNotification");
 const { sendSms } = require("../utils/smsNotification");
-
 const DELIVERY_CHARGES = 40;
-
 // Generates a short, human friendly order id, e.g. ORD-7F3K9QZP
 const generateOrderId = () =>
   `ORD-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-
 // POST /checkout
 // body: { addressId }
 // Reads the user's cartItems, groups them by seller, validates stock,
@@ -182,7 +179,6 @@ const placeOrder = async (req, res) => {
       .json({ err_msg: "Something went wrong, please try again" });
   }
 };
-
 // GET /orders - all orders placed by the logged-in user, across all sellers
 const getUserOrders = async (req, res) => {
   try {
@@ -212,7 +208,6 @@ const getUserOrders = async (req, res) => {
       .json({ err_msg: "Something went wrong, please try again" });
   }
 };
-
 // GET /seller-orders - all orders belonging to the logged-in seller
 const getSellerOrders = async (req, res) => {
   try {
@@ -233,7 +228,6 @@ const getSellerOrders = async (req, res) => {
       .json({ err_msg: "Something went wrong, please try again" });
   }
 };
-
 // ─── PATCH /seller-orders/:orderId/status ────────────────────────────────────
 // Seller updates the status of one of their orders
 const VALID_STATUSES = [
@@ -245,24 +239,18 @@ const VALID_STATUSES = [
   "Delivered",
   "Cancelled",
 ];
-
 const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { orderStatus } = req.body;
-
     if (!VALID_STATUSES.includes(orderStatus))
       return res.status(400).json({ err_msg: "Invalid order status" });
-
     const seller = await Seller.findById(req.sellerId);
     if (!seller) return res.status(404).json({ err_msg: "Seller not found" });
-
     const order = seller.orders.find((o) => o._id.toString() === orderId);
     if (!order) return res.status(404).json({ err_msg: "Order not found" });
-
     order.orderStatus = orderStatus;
     await seller.save();
-
     // Orders can have multiple items - build a short readable summary,
     // e.g. "Bamboo Toothbrush" or "Bamboo Toothbrush and 2 more items".
     const productNames = order.items.map((item) => item.productName);
@@ -272,19 +260,6 @@ const updateOrderStatus = async (req, res) => {
             productNames.length - 1 > 1 ? "s" : ""
           }`
         : productNames[0] || "your item";
-
-    // ── Notify the customer: order status changed ─────────────────────────
-    // Fire-and-forget: don't block/fail the response if push notifications
-    // aren't configured yet or a send fails. sendPushNotification always
-    // logs what happened (including "no devices registered yet"), so check
-    // the server console to confirm this fired.
-
-    // ── Notify the customer: order status changed ─────────────────────────
-    // Fire-and-forget: don't block/fail the response if push notifications
-    // aren't configured yet or a send fails. sendPushNotification always
-    // logs what happened (including "no devices registered yet"), so check
-    // the server console to confirm this fired.
-
     User.findById(order.userId, "fcmTokens mobileNumber")
       .then((user) => {
         sendPushNotification(user?.fcmTokens || [], {
@@ -296,7 +271,6 @@ const updateOrderStatus = async (req, res) => {
             orderStatus,
           },
         });
-
         if (user?.mobileNumber) {
           sendSms(
             user.mobileNumber,
@@ -308,7 +282,6 @@ const updateOrderStatus = async (req, res) => {
         console.log("order-status notification error:", error.message),
       );
     // ───────────────────────────────────────────────────────────────────────
-
     return res
       .status(200)
       .json({ succ_msg: "Order status updated", orderStatus });
@@ -319,9 +292,7 @@ const updateOrderStatus = async (req, res) => {
       .json({ err_msg: "Something went wrong, please try again" });
   }
 };
-
 // ─── PUT /seller-products/:productId ─────────────────────────────────────────
-// Seller edits one of their products (text fields; images handled separately)
 const updateProduct = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -337,7 +308,6 @@ const updateProduct = async (req, res) => {
       carbonFootprint,
       packagingType,
     } = req.body;
-
     let ingredients, specifications;
     try {
       ingredients = req.body.ingredients
@@ -353,13 +323,10 @@ const updateProduct = async (req, res) => {
     } catch {
       specifications = undefined;
     }
-
     const seller = await Seller.findById(req.sellerId);
     if (!seller) return res.status(404).json({ err_msg: "Seller not found" });
-
     const product = seller.products.find((p) => p._id.toString() === productId);
     if (!product) return res.status(404).json({ err_msg: "Product not found" });
-
     // Apply only the fields that were sent
     if (productName !== undefined) product.productName = productName;
     if (brand !== undefined) product.brand = brand;
@@ -377,14 +344,12 @@ const updateProduct = async (req, res) => {
       product.carbonFootprint = parseFloat(carbonFootprint);
     if (packagingType !== undefined) product.packagingType = packagingType;
     if (specifications !== undefined) product.specifications = specifications;
-
     // Handle new images if uploaded
     const files = req.files || {};
     if (files.thumbnail && files.thumbnail[0])
       product.thumbnail = files.thumbnail[0].filename;
     if (files.productImgs && files.productImgs.length)
       product.productImgs = files.productImgs.map((f) => f.filename);
-
     await seller.save();
     return res
       .status(200)
@@ -396,7 +361,6 @@ const updateProduct = async (req, res) => {
       .json({ err_msg: "Something went wrong, please try again" });
   }
 };
-
 // ── POST /products/:productId/comments ────────────────────────────────────────
 // Authenticated user posts a comment on a delivered product
 const addComment = async (req, res) => {
@@ -414,7 +378,6 @@ const addComment = async (req, res) => {
       return res
         .status(400)
         .json({ err_msg: "Rating must be between 1 and 5" });
-
     // Check the user has a delivered order containing this product
     const allSellers = await Seller.find({ "orders.userId": req.userId });
     let hasDeliveredOrder = false;
@@ -454,11 +417,9 @@ const addComment = async (req, res) => {
       return res
         .status(400)
         .json({ err_msg: "You have already reviewed this product" });
-
     // Get username
     const user = await User.findById(req.userId, "username");
     if (!user) return res.status(404).json({ err_msg: "User not found" });
-
     product.comments.push({
       userId: req.userId,
       username: user.username,
@@ -466,7 +427,6 @@ const addComment = async (req, res) => {
       comment: comment.trim(),
     });
     await sellerWithProduct.save();
-
     const saved = product.comments[product.comments.length - 1];
     return res
       .status(201)
@@ -483,26 +443,22 @@ const addComment = async (req, res) => {
 const getComments = async (req, res) => {
   try {
     const { productId } = req.params;
-
     const seller = await Seller.findOne(
       { "products._id": productId },
       "products.$",
     );
     if (!seller || !seller.products.length)
       return res.status(404).json({ err_msg: "Product not found" });
-
     const product = seller.products[0];
     const comments = [...(product.comments || [])].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
     );
-
     const avgRating =
       comments.length > 0
         ? (
             comments.reduce((sum, c) => sum + c.rating, 0) / comments.length
           ).toFixed(1)
         : null;
-
     return res
       .status(200)
       .json({ comments, avgRating, total: comments.length });
@@ -513,7 +469,6 @@ const getComments = async (req, res) => {
       .json({ err_msg: "Something went wrong, please try again" });
   }
 };
-
 module.exports = {
   placeOrder,
   getUserOrders,
